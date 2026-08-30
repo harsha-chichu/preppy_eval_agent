@@ -6,14 +6,16 @@ Shows the question, takes your answer, lets the agent decide whether to ask a
 follow-up (answered in the UI), then runs the evaluation and displays the result.
 """
 
+import tempfile
+
 import streamlit as st
 
 from src.agent.graph import resume, start
 from src.agent.state import Difficulty, EvalStatus, UserInput
 
 # The question under test - same as main.py.
-QUESTION = "Explain how a transformer handles long-range dependencies."
-DIFFICULTY = Difficulty.hard
+QUESTION = "What is machine learning and how does backpropagation work?"
+DIFFICULTY = Difficulty.medium
 DOMAIN = "ai"
 
 st.set_page_config(page_title="Eval Agent", page_icon="🧪")
@@ -21,7 +23,7 @@ st.set_page_config(page_title="Eval Agent", page_icon="🧪")
 
 def _reset() -> None:
     for key in list(st.session_state.keys()):
-        if key in ("phase", "thread_id", "result", "followups", "answer") or key.startswith("fa_"):
+        if key in ("phase", "thread_id", "result", "followups", "answer", "audio") or key.startswith(("fa_", "faa_")):
             st.session_state.pop(key, None)
 
 
@@ -51,12 +53,24 @@ phase = st.session_state.phase
 # ── 1. initial answer ────────────────────────────────────────────────────────
 if phase == "answer":
     answer = st.text_area("Your answer", height=160, key="answer")
-    if st.button("Submit answer", type="primary", disabled=not answer.strip()):
+    st.caption("…or answer out loud instead:")
+    audio = st.audio_input("Record your answer", key="audio")
+
+    has_answer = bool(answer.strip()) or audio is not None
+    if st.button("Submit answer", type="primary", disabled=not has_answer):
+        audio_path = None
+        if audio is not None:
+            tmp = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
+            tmp.write(audio.getvalue())
+            tmp.close()
+            audio_path = tmp.name
         _run(
             start,
             UserInput(
                 actual_question=QUESTION,
-                user_response=answer.strip(),
+                # a recording takes precedence; its transcript becomes the answer
+                user_response=None if audio_path else answer.strip(),
+                audio_path=audio_path,
                 difficulty=DIFFICULTY,
                 domain=DOMAIN,
             ),
@@ -71,12 +85,22 @@ elif phase == "followup":
 
     question = st.session_state.result["followup_question"]
     st.warning(f"**The agent needs a follow-up:**\n\n{question}")
-    fa = st.text_area(
-        "Your follow-up answer", height=120, key=f"fa_{len(st.session_state.followups)}"
-    )
-    if st.button("Submit follow-up", type="primary", disabled=not fa.strip()):
-        st.session_state.followups.append((question, fa.strip()))
-        _run(resume, st.session_state.thread_id, fa.strip())
+    n = len(st.session_state.followups)
+    fa = st.text_area("Your follow-up answer", height=120, key=f"fa_{n}")
+    st.caption("…or answer out loud instead:")
+    fa_audio = st.audio_input("Record your follow-up answer", key=f"faa_{n}")
+
+    has_reply = bool(fa.strip()) or fa_audio is not None
+    if st.button("Submit follow-up", type="primary", disabled=not has_reply):
+        if fa_audio is not None:
+            tmp = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
+            tmp.write(fa_audio.getvalue())
+            tmp.close()
+            st.session_state.followups.append((question, "🎙️ (spoken answer)"))
+            _run(resume, st.session_state.thread_id, None, tmp.name)
+        else:
+            st.session_state.followups.append((question, fa.strip()))
+            _run(resume, st.session_state.thread_id, fa.strip())
         st.rerun()
 
 # ── 3. result ────────────────────────────────────────────────────────────────
@@ -112,6 +136,27 @@ elif phase == "done":
     if result.followup_evaluation:
         st.markdown("**Follow-up evaluation**")
         st.write(result.followup_evaluation)
+
+    if result.communication_evaluation:
+        ce = result.communication_evaluation
+        st.divider()
+        st.subheader("Communication (from your recording)")
+        if result.overall_score is not None:
+            st.metric("Overall score (80% content / 20% communication)", f"{result.overall_score:.1f} / 10")
+        g1, g2, g3, g4 = st.columns(4)
+        g1.metric("Grammar", f"{ce.grammar_score:.1f}")
+        g2.metric("Pronunciation", f"{ce.pronunciation_score:.1f}")
+        g3.metric("Fluency", f"{ce.fluency_score:.1f}")
+        g4.metric("Clarity", f"{ce.clarity_score:.1f}")
+        st.write(ce.communication_feedback)
+        if ce.filler_words_used:
+            st.caption(f"Filler words: {', '.join(ce.filler_words_used)}")
+        st.caption(f"Noticeable pauses: {ce.pause_count}")
+        if ce.mispronounced_words:
+            st.caption(f"Mispronounced: {', '.join(ce.mispronounced_words)}")
+        if res.get("transcript"):
+            with st.expander("Transcript", expanded=False):
+                st.write(res["transcript"])
 
     if review is not None:
         with st.expander("Validation (self-check of the evaluation)", expanded=False):

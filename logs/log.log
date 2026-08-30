@@ -280,3 +280,98 @@ LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
 LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
 2026-08-30 20:28:24,413 - INFO - Wrapper: Completed Call, calling success_handler
 2026-08-30 20:28:24,415 - INFO - validate_node: needs_regeneration=False grounded=True rubric_consistent=True -> done
+2026-08-31 00:53:16,411 - INFO - transcribe_node: no audio, skipping.
+2026-08-31 01:01:56,545 - INFO - graph.start thread_id=bcb46847cee849acaeeb95bbc61ed554
+2026-08-31 01:01:56,577 - INFO - Running transcribe_node on C:\Users\Dell\AppData\Local\Temp\tmpprlfex_1.wav ...
+2026-08-31 01:01:56,664 - INFO - 
+LiteLLM completion() model= gemini-2.5-flash; provider = gemini
+2026-08-31 01:03:48,339 - INFO - graph.start thread_id=f5e4cef08b5d4cf5a12ef6869af05262
+2026-08-31 01:03:48,358 - INFO - Running transcribe_node on C:\Users\Dell\AppData\Local\Temp\tmplyw587ya.wav ...
+2026-08-31 01:03:48,444 - INFO - 
+LiteLLM completion() model= gemini-3.5-flash-lite; provider = gemini
+2026-08-31 01:03:48,446 - INFO - Warning: Setting temperature < 1.0 for Gemini 3 models (gemini-3.5-flash-lite) can cause infinite loops, degraded reasoning performance, and failure on complex tasks. Strongly recommended to use temperature = 1.0 (default).
+2026-08-31 01:03:48,447 - WARNING - DeprecationWarning: `temperature`, `top_p`, and `top_k` continue to function for Gemini 3+ (gemini-3.5-flash-lite) but are planned for removal in a future release. Move sampling guidance into the `system` instructions instead.
+2026-08-31 01:03:51,147 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:03:51,157 - INFO - transcribe_node completed (116 chars transcribed).
+2026-08-31 01:03:51,160 - INFO - Running plan_node...
+2026-08-31 01:03:51,210 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-31 01:03:56,882 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:03:56,885 - INFO - plan_node completed.
+2026-08-31 01:03:56,889 - INFO - Running followup_gate_node (iteration=0)...
+2026-08-31 01:03:56,907 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-31 01:04:00,050 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:04:00,052 - INFO - followup_gate_node: follow-up required.
+2026-08-31 01:04:00,053 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-31 01:04:25,833 - INFO - graph.resume thread_id=f5e4cef08b5d4cf5a12ef6869af05262
+2026-08-31 01:04:25,853 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-31 01:04:25,857 - INFO - Running followup_gate_node (iteration=1)...
+2026-08-31 01:04:25,870 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-31 01:04:29,010 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:04:29,013 - INFO - followup_gate_node: proceeding to scoring.
+2026-08-31 01:04:29,016 - INFO - Running execute_node...
+2026-08-31 01:04:29,023 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-31 01:04:37,197 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:04:37,203 - INFO - execute_node completed (score=1.5, overall=2.75).
+2026-08-31 01:04:37,204 - INFO - Running validate_node (validate_iteration=0)...
+2026-08-31 01:04:37,207 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-31 01:04:38,569 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:04:38,571 - INFO - validate_node: needs_regeneration=False grounded=True rubric_consistent=True -> done
+2026-08-31 01:31:14,370 - INFO - Running followup_gate_node (iteration=0)...
+2026-08-31 01:31:14,370 - INFO - followup_gate_node: follow-up required.
+2026-08-31 01:31:14,370 - INFO - Running followup_gate_node (iteration=0)...
+2026-08-31 01:31:14,371 - INFO - followup_gate_node: proceeding to scoring.
+2026-08-31 01:33:22,320 - ERROR - Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\Dell\AppData\Roaming\uv\python\cpython-3.13.7-windows-x86_64-none\Lib\asyncio\events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dell\AppData\Roaming\uv\python\cpython-3.13.7-windows-x86_64-none\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+2026-08-31 01:34:09,132 - INFO - graph.start thread_id=adfaa0c293374ca594c60c933deb0c8e
+2026-08-31 01:34:09,151 - INFO - Running transcribe_node on C:\Users\Dell\AppData\Local\Temp\tmpmh0qjqiu.wav ...
+2026-08-31 01:34:09,280 - INFO - 
+LiteLLM completion() model= gemini-3.5-flash-lite; provider = gemini
+2026-08-31 01:34:09,282 - WARNING - DeprecationWarning: `temperature`, `top_p`, and `top_k` continue to function for Gemini 3+ (gemini-3.5-flash-lite) but are planned for removal in a future release. Move sampling guidance into the `system` instructions instead.
+2026-08-31 01:34:11,968 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:34:11,972 - INFO - transcribe_node completed (101 chars transcribed).
+2026-08-31 01:34:11,977 - INFO - Running followup_gate_node (iteration=0)...
+2026-08-31 01:34:11,981 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-31 01:34:15,104 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:34:15,105 - INFO - followup_gate_node: follow-up required.
+2026-08-31 01:34:15,108 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-31 01:34:47,275 - INFO - graph.resume thread_id=adfaa0c293374ca594c60c933deb0c8e audio=True
+2026-08-31 01:34:47,281 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-31 01:34:47,281 - INFO - ask_followup_node: transcribing spoken follow-up answer.
+2026-08-31 01:34:47,435 - INFO - 
+LiteLLM completion() model= gemini-3.5-flash-lite; provider = gemini
+2026-08-31 01:34:47,435 - WARNING - DeprecationWarning: `temperature`, `top_p`, and `top_k` continue to function for Gemini 3+ (gemini-3.5-flash-lite) but are planned for removal in a future release. Move sampling guidance into the `system` instructions instead.
+2026-08-31 01:34:51,224 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:34:51,229 - INFO - Running followup_gate_node (iteration=1)...
+2026-08-31 01:34:51,232 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-31 01:34:54,326 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:34:54,329 - INFO - followup_gate_node: proceeding to scoring.
+2026-08-31 01:34:54,332 - INFO - Running plan_node...
+2026-08-31 01:34:54,333 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-31 01:34:59,569 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:34:59,570 - INFO - plan_node completed.
+2026-08-31 01:34:59,572 - INFO - Running execute_node...
+2026-08-31 01:34:59,579 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-31 01:35:07,703 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:35:07,706 - INFO - execute_node completed (score=3.8, overall=4.56).
+2026-08-31 01:35:07,707 - INFO - Running validate_node (validate_iteration=0)...
+2026-08-31 01:35:07,710 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-31 01:35:09,387 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:35:09,389 - INFO - validate_node: needs_regeneration=False grounded=True rubric_consistent=True -> done

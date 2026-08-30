@@ -17,7 +17,7 @@ def plan_node(state: AgentState) -> dict:
     """
     logger.info("Running plan_node...")
 
-    rubric = fetch_rubric(state.input.domain)
+    rubric = state.rubric or fetch_rubric(state.input.domain)
     prompt = PLAN_PROMPT.format(
         actual_question=state.input.actual_question,
         domain=state.input.domain,

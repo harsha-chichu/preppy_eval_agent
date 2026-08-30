@@ -1,7 +1,15 @@
 """LangGraph wiring for the evaluation agent.
 
-Flow:  plan -> followup_gate -> (ask_followup -> followup_gate)* -> execute
-       -> validate -> (execute -> validate)*  -> END
+Flow:  transcribe -> followup_gate -> (ask_followup -> followup_gate)*
+       -> plan -> execute -> validate -> (execute -> validate)*  -> END
+
+``transcribe`` is a no-op for typed answers; for voice answers it sends the
+audio to Gemini and fills ``transcript`` + ``communication_evaluation``.
+
+``followup_gate`` runs first so a follow-up question reaches the caller after a
+single LLM call. It decides using the question, the answer and the fixed rubric
+(a free static lookup) - not the plan, whose LLM call is deferred until after the
+follow-up loop clears.
 
 ``ask_followup`` calls ``interrupt()``, so the graph pauses there and hands the
 follow-up question back to the caller. The caller collects an answer and calls
@@ -29,6 +37,7 @@ from src.agent.nodes import (
     followup_gate_node,
     plan_node,
     should_regenerate,
+    transcribe_node,
     validate_node,
 )
 from src.agent.state import AgentState, EvalStatus, UserInput
@@ -46,6 +55,7 @@ _SERDE = JsonPlusSerializer(
         _state.EvaluationPlan,
         _state.FollowupDecision,
         _state.CommunicationEvaluation,
+        _state.AudioAnalysis,
         _state.EvaluationResult,
         _state.ReviewResult,
     ]
@@ -53,7 +63,7 @@ _SERDE = JsonPlusSerializer(
 
 
 def route_after_gate(state: AgentState) -> str:
-    return "ask_followup" if state.awaiting_followup_answer else "execute"
+    return "ask_followup" if state.awaiting_followup_answer else "plan"
 
 
 def route_after_validate(state: AgentState) -> str:
@@ -62,20 +72,22 @@ def route_after_validate(state: AgentState) -> str:
 
 def build_graph():
     builder = StateGraph(AgentState)
+    builder.add_node("transcribe", transcribe_node)
     builder.add_node("plan", plan_node)
     builder.add_node("followup_gate", followup_gate_node)
     builder.add_node("ask_followup", ask_followup_node)
     builder.add_node("execute", execute_node)
     builder.add_node("validate", validate_node)
 
-    builder.add_edge(START, "plan")
-    builder.add_edge("plan", "followup_gate")
+    builder.add_edge(START, "transcribe")
+    builder.add_edge("transcribe", "followup_gate")
     builder.add_conditional_edges(
         "followup_gate",
         route_after_gate,
-        {"ask_followup": "ask_followup", "execute": "execute"},
+        {"ask_followup": "ask_followup", "plan": "plan"},
     )
     builder.add_edge("ask_followup", "followup_gate")
+    builder.add_edge("plan", "execute")
     builder.add_edge("execute", "validate")
     builder.add_conditional_edges(
         "validate",
@@ -106,6 +118,7 @@ def _package(thread_id: str, out) -> dict:
         "status": EvalStatus.completed,
         "evaluation_result": _get(out, "evaluation_result"),
         "review_result": _get(out, "review_result"),
+        "transcript": _get(out, "transcript"),
     }
 
 
@@ -119,10 +132,16 @@ def start(user_input: UserInput, thread_id: str | None = None) -> dict:
     return _package(thread_id, out)
 
 
-def resume(thread_id: str, answer: str) -> dict:
+def resume(thread_id: str, answer: str | None = None, audio_path: str | None = None) -> dict:
     """Supply the follow-up answer for ``thread_id`` and finish scoring (or ask
-    another follow-up, up to ``max_iterations``)."""
+    another follow-up, up to ``max_iterations``).
+
+    The answer may be typed (``answer``) or spoken (``audio_path``, transcribed
+    inside ``ask_followup_node``)."""
+    if not answer and not audio_path:
+        raise ValueError("resume() needs answer or audio_path")
     config = {"configurable": {"thread_id": thread_id}}
-    logger.info("graph.resume thread_id=%s", thread_id)
-    out = _GRAPH.invoke(Command(resume=answer), config)
+    logger.info("graph.resume thread_id=%s audio=%s", thread_id, bool(audio_path))
+    payload = {"audio_path": audio_path} if audio_path else answer
+    out = _GRAPH.invoke(Command(resume=payload), config)
     return _package(thread_id, out)

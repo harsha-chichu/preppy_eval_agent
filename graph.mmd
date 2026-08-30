@@ -5,18 +5,20 @@ config:
 ---
 graph TD;
 	__start__([<p>__start__</p>]):::first
+	transcribe(transcribe)
 	plan(plan)
 	followup_gate(followup_gate)
 	ask_followup(ask_followup)
 	execute(execute)
 	validate(validate)
 	__end__([<p>__end__</p>]):::last
-	__start__ --> plan;
+	__start__ --> transcribe;
 	ask_followup --> followup_gate;
 	execute --> validate;
 	followup_gate -.-> ask_followup;
-	followup_gate -.-> execute;
-	plan --> followup_gate;
+	followup_gate -.-> plan;
+	plan --> execute;
+	transcribe --> followup_gate;
 	validate -.-> __end__;
 	validate -.-> execute;
 	classDef default fill:#f2f0ff,line-height:1.2

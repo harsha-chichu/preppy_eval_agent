@@ -1,5 +1,6 @@
 """Local CLI demo of the evaluation agent over the stateless start()/resume() API."""
 
+import os
 import sys
 
 from src.agent.graph import resume, start
@@ -20,6 +21,16 @@ def _print_result(result) -> None:
     print(f"weaknesses: {result.weaknesses}")
     if result.followup_evaluation:
         print(f"followup:   {result.followup_evaluation}")
+    if result.communication_evaluation:
+        ce = result.communication_evaluation
+        print("\n--- Communication ---")
+        print(f"overall:    {result.overall_score}")
+        print(
+            f"grammar={ce.grammar_score} pronunciation={ce.pronunciation_score} "
+            f"fluency={ce.fluency_score} clarity={ce.clarity_score}"
+        )
+        print(f"fillers={ce.filler_words_used} pauses={ce.pause_count}")
+        print(f"feedback:   {ce.communication_feedback}")
 
 
 def _print_review(review) -> None:
@@ -34,10 +45,14 @@ def _print_review(review) -> None:
 
 
 def main() -> None:
+    # Pass a path to a recorded answer as argv[1] to exercise the voice path;
+    # otherwise a hard-coded typed answer is used.
+    audio_path = sys.argv[1] if len(sys.argv) > 1 else None
     user_input = UserInput(
-        actual_question="Explain how a transformer handles long-range dependencies.",
-        user_response="it is in the attention mechanism",
-        difficulty=Difficulty.hard,
+        actual_question="What is machine learning and how does backpropagation work?",
+        user_response=None if audio_path else "it is in the attention mechanism",
+        audio_path=audio_path,
+        difficulty=Difficulty.medium,
         domain="ai",
     )
 
@@ -45,8 +60,11 @@ def main() -> None:
 
     while res["status"] == EvalStatus.pending_followup:
         print(f"\nFollow-up needed: {res['followup_question']}")
-        answer = input("Your answer: ").strip()
-        res = resume(res["thread_id"], answer)
+        answer = input("Your answer (or a path to an audio file): ").strip()
+        if os.path.isfile(answer):
+            res = resume(res["thread_id"], audio_path=answer)
+        else:
+            res = resume(res["thread_id"], answer)
 
     _print_result(res["evaluation_result"])
     _print_review(res.get("review_result"))

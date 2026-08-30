@@ -2,6 +2,7 @@ from logger import logger
 
 from src.agent.state import AgentState, EvaluationResult
 from src.config.client import call_structured_llm
+from src.config.constants import CONTENT_WEIGHT
 from src.prompts import EXECUTE_PROMPT
 
 
@@ -29,5 +30,22 @@ def execute_node(state: AgentState) -> dict:
     result = call_structured_llm(prompt, EvaluationResult, max_tokens=2000)
 
     result.evaluation_plan_used = state.plan
-    logger.info("execute_node completed (score=%s).", result.score)
+
+    # Voice answers: fold in the delivery assessment and a blended overall score.
+    # The content LLM leaves these null; we fill them deterministically here so
+    # the model never invents communication sub-scores.
+    if state.communication_evaluation:
+        comm = state.communication_evaluation
+        comm_score = (
+            comm.grammar_score
+            + comm.pronunciation_score
+            + comm.fluency_score
+            + comm.clarity_score
+        ) / 4
+        result.communication_evaluation = comm
+        result.overall_score = round(
+            CONTENT_WEIGHT * result.score + (1 - CONTENT_WEIGHT) * comm_score, 2
+        )
+
+    logger.info("execute_node completed (score=%s, overall=%s).", result.score, result.overall_score)
     return {"evaluation_result": result}

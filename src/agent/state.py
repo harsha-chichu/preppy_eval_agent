@@ -64,6 +64,13 @@ class CommunicationEvaluation(BaseModel):
     )
 
 
+class AudioAnalysis(BaseModel):
+    """Structured reply from the Gemini call on a spoken answer."""
+
+    transcript: str = Field(..., description="Verbatim transcript of the spoken answer")
+    communication: CommunicationEvaluation
+
+
 class EvaluationResult(BaseModel):
     score: float = Field(..., ge=0, le=10, description="Score out of 10 for the response")
     is_correct: bool = Field(..., description="Whether the response is considered correct")
@@ -91,14 +98,38 @@ class ReviewResult(BaseModel):
 
 class UserInput(BaseModel):
     actual_question: str = Field(..., description="The original question asked to the user")
-    user_response: str = Field(..., description="The user's response to the actual question")
+    user_response: Optional[str] = Field(
+        default=None,
+        description="The user's typed response; None when the answer was given by voice (see audio_path)",
+    )
+    audio_path: Optional[str] = Field(
+        default=None,
+        description="Local path to the candidate's recorded answer (wav/mp3/m4a/ogg/webm/flac)",
+    )
     difficulty: Difficulty = Field(..., description="Difficulty level of the question")
     domain: str = Field(..., description="Topic/domain selected by the user in the UI, e.g. 'ai', 'ml', 'ai system design', 'ml system design'")
+
+    @model_validator(mode="after")
+    def _require_an_answer(self):
+        if not self.user_response and not self.audio_path:
+            raise ValueError("provide user_response or audio_path")
+        return self
 
 
 class AgentState(BaseModel):
     # inputs
     input: UserInput
+
+    # transcribe stage (voice answers only; no-op for typed answers)
+    transcript: Optional[str] = Field(
+        default=None, description="Transcript of the spoken answer, once produced"
+    )
+    communication_evaluation: Optional[CommunicationEvaluation] = Field(
+        default=None, description="Delivery assessment from the audio (grammar, pronunciation, fluency, ...)"
+    )
+
+    # rubric (free static lookup; fetched by followup_gate, reused by plan)
+    rubric: Optional[Rubric] = None
 
     # plan stage
     plan: Optional[EvaluationPlan] = None
