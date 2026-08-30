@@ -1,0 +1,282 @@
+2026-08-30 19:44:02,064 - INFO - graph.start thread_id=0c709ada141f4bccad11651929833413
+2026-08-30 19:44:02,074 - INFO - Running plan_node...
+2026-08-30 19:44:02,110 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:44:07,394 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:44:07,397 - INFO - plan_node completed.
+2026-08-30 19:44:07,398 - INFO - Running followup_gate_node (iteration=0)...
+2026-08-30 19:44:07,401 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:44:10,932 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:44:10,935 - INFO - followup_gate_node: proceeding to scoring.
+2026-08-30 19:44:10,938 - INFO - Running execute_node...
+2026-08-30 19:44:10,943 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:44:18,725 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:44:18,744 - INFO - execute_node completed (score=7.2).
+2026-08-30 19:44:18,750 - INFO - Running validate_node (validate_iteration=0)...
+2026-08-30 19:44:18,766 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:44:24,360 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:44:24,361 - INFO - validate_node: needs_regeneration=True grounded=True rubric_consistent=False -> re-execute
+2026-08-30 19:44:24,362 - INFO - Running execute_node...
+2026-08-30 19:44:24,373 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:44:29,528 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:44:29,528 - INFO - execute_node completed (score=7.2).
+2026-08-30 19:44:29,529 - INFO - Running validate_node (validate_iteration=1)...
+2026-08-30 19:44:29,532 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:44:33,865 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:44:33,866 - INFO - validate_node: needs_regeneration=True grounded=True rubric_consistent=False -> done
+2026-08-30 19:44:33,892 - INFO - graph.start thread_id=d3d3816a1c614bbb9c24eb9379ae029d
+2026-08-30 19:44:33,921 - INFO - Running plan_node...
+2026-08-30 19:44:33,922 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:44:39,150 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:44:39,151 - INFO - plan_node completed.
+2026-08-30 19:44:39,152 - INFO - Running followup_gate_node (iteration=0)...
+2026-08-30 19:44:39,154 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:44:41,632 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:44:41,633 - INFO - followup_gate_node: proceeding to scoring.
+2026-08-30 19:44:41,634 - INFO - Running execute_node...
+2026-08-30 19:44:41,639 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:44:46,938 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:44:46,939 - INFO - execute_node completed (score=5.2).
+2026-08-30 19:44:46,940 - INFO - Running validate_node (validate_iteration=0)...
+2026-08-30 19:44:46,941 - INFO - validate_node: needs_regeneration=True grounded=False rubric_consistent=False -> re-execute
+2026-08-30 19:44:46,943 - INFO - Running execute_node...
+2026-08-30 19:44:46,946 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:44:52,446 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:44:52,447 - INFO - execute_node completed (score=5.2).
+2026-08-30 19:44:52,448 - INFO - Running validate_node (validate_iteration=1)...
+2026-08-30 19:44:52,449 - INFO - validate_node: needs_regeneration=True grounded=False rubric_consistent=False -> done
+2026-08-30 19:45:34,705 - INFO - graph.start thread_id=b97f3e6322584e508072e0022da2fa73
+2026-08-30 19:45:34,724 - INFO - Running plan_node...
+2026-08-30 19:45:34,784 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:45:41,864 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:45:41,872 - INFO - plan_node completed.
+2026-08-30 19:45:41,874 - INFO - Running followup_gate_node (iteration=0)...
+2026-08-30 19:45:41,882 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:45:44,783 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:45:44,786 - INFO - followup_gate_node: follow-up required.
+2026-08-30 19:45:44,789 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-30 19:45:44,794 - INFO - graph.resume thread_id=b97f3e6322584e508072e0022da2fa73
+2026-08-30 19:45:44,797 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-30 19:45:44,799 - INFO - Running followup_gate_node (iteration=1)...
+2026-08-30 19:45:44,800 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:45:47,960 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:45:47,963 - INFO - followup_gate_node: proceeding to scoring.
+2026-08-30 19:45:47,964 - INFO - Running execute_node...
+2026-08-30 19:45:47,968 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:45:54,643 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:45:54,646 - INFO - execute_node completed (score=7.2).
+2026-08-30 19:45:54,647 - INFO - Running validate_node (validate_iteration=0)...
+2026-08-30 19:45:54,649 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:45:58,890 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:45:58,892 - INFO - validate_node: needs_regeneration=True grounded=True rubric_consistent=False -> re-execute
+2026-08-30 19:45:58,893 - INFO - Running execute_node...
+2026-08-30 19:45:58,896 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:46:05,681 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:46:05,682 - INFO - execute_node completed (score=7.2).
+2026-08-30 19:46:05,683 - INFO - Running validate_node (validate_iteration=1)...
+2026-08-30 19:46:05,685 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:46:10,501 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:46:10,502 - INFO - validate_node: needs_regeneration=True grounded=True rubric_consistent=False -> done
+2026-08-30 19:46:49,056 - INFO - graph.start thread_id=485ff2a9b29a44488c356726cfbc14af
+2026-08-30 19:46:49,067 - INFO - Running plan_node...
+2026-08-30 19:46:49,103 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:46:54,765 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:46:54,769 - INFO - plan_node completed.
+2026-08-30 19:46:54,769 - INFO - Running followup_gate_node (iteration=0)...
+2026-08-30 19:46:54,773 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:46:57,478 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:46:57,480 - INFO - followup_gate_node: follow-up required.
+2026-08-30 19:46:57,482 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-30 19:46:57,483 - INFO - graph.resume thread_id=485ff2a9b29a44488c356726cfbc14af
+2026-08-30 19:46:57,485 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-30 19:46:57,487 - INFO - Running followup_gate_node (iteration=1)...
+2026-08-30 19:46:57,488 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:46:59,966 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:46:59,967 - INFO - followup_gate_node: proceeding to scoring.
+2026-08-30 19:46:59,968 - INFO - Running execute_node...
+2026-08-30 19:46:59,972 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:47:07,588 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:47:07,590 - INFO - execute_node completed (score=7.2).
+2026-08-30 19:47:07,591 - INFO - Running validate_node (validate_iteration=0)...
+2026-08-30 19:47:07,593 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:47:08,837 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:47:08,838 - INFO - validate_node: needs_regeneration=False grounded=True rubric_consistent=True -> done
+2026-08-30 19:48:42,206 - INFO - graph.start thread_id=39a6645abee64d5cabe3f187ffdf2cba
+2026-08-30 19:48:42,224 - INFO - Running plan_node...
+2026-08-30 19:48:42,282 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:48:47,795 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:48:47,809 - INFO - plan_node completed.
+2026-08-30 19:48:47,814 - INFO - Running followup_gate_node (iteration=0)...
+2026-08-30 19:48:47,822 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:48:51,172 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:48:51,192 - INFO - followup_gate_node: follow-up required.
+2026-08-30 19:48:51,200 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-30 19:49:01,087 - INFO - graph.resume thread_id=39a6645abee64d5cabe3f187ffdf2cba
+2026-08-30 19:49:01,110 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-30 19:49:01,112 - INFO - Running followup_gate_node (iteration=1)...
+2026-08-30 19:49:01,114 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:49:03,694 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:49:03,695 - INFO - followup_gate_node: proceeding to scoring.
+2026-08-30 19:49:03,698 - INFO - Running execute_node...
+2026-08-30 19:49:03,706 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:49:09,715 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:49:09,718 - INFO - execute_node completed (score=1.5).
+2026-08-30 19:49:09,722 - INFO - Running validate_node (validate_iteration=0)...
+2026-08-30 19:49:09,727 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 19:49:10,909 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 19:49:10,912 - INFO - validate_node: needs_regeneration=False grounded=True rubric_consistent=True -> done
+2026-08-30 20:02:32,787 - INFO - graph.start thread_id=8727d6c39e0e4795b3aa96666ed83811
+2026-08-30 20:02:32,831 - INFO - Running plan_node...
+2026-08-30 20:02:32,946 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:02:38,679 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:02:38,683 - INFO - plan_node completed.
+2026-08-30 20:02:38,686 - INFO - Running followup_gate_node (iteration=0)...
+2026-08-30 20:02:38,691 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:02:42,444 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:02:42,447 - INFO - followup_gate_node: follow-up required.
+2026-08-30 20:02:42,449 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-30 20:03:24,457 - INFO - graph.resume thread_id=8727d6c39e0e4795b3aa96666ed83811
+2026-08-30 20:03:24,477 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-30 20:03:24,479 - INFO - Running followup_gate_node (iteration=1)...
+2026-08-30 20:03:24,494 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:03:27,415 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:03:27,418 - INFO - followup_gate_node: proceeding to scoring.
+2026-08-30 20:03:27,423 - INFO - Running execute_node...
+2026-08-30 20:03:27,429 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:03:35,373 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:03:35,396 - INFO - execute_node completed (score=6.2).
+2026-08-30 20:03:35,397 - INFO - Running validate_node (validate_iteration=0)...
+2026-08-30 20:03:35,402 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:03:36,672 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:03:36,673 - INFO - validate_node: needs_regeneration=False grounded=True rubric_consistent=True -> done
+2026-08-30 20:08:38,925 - INFO - graph.start thread_id=1f2fea1c84af4076ac2db68233f194ab
+2026-08-30 20:08:38,947 - INFO - Running plan_node...
+2026-08-30 20:08:38,955 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:08:44,789 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:08:44,792 - INFO - plan_node completed.
+2026-08-30 20:08:44,796 - INFO - Running followup_gate_node (iteration=0)...
+2026-08-30 20:08:44,802 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:08:47,438 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:08:47,441 - INFO - followup_gate_node: follow-up required.
+2026-08-30 20:08:47,443 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-30 20:14:15,694 - INFO - graph.resume thread_id=1f2fea1c84af4076ac2db68233f194ab
+2026-08-30 20:14:15,716 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-30 20:14:15,719 - INFO - Running followup_gate_node (iteration=1)...
+2026-08-30 20:14:15,734 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:14:18,694 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:14:18,697 - INFO - followup_gate_node: proceeding to scoring.
+2026-08-30 20:14:18,701 - INFO - Running execute_node...
+2026-08-30 20:14:18,710 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:14:24,621 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:14:24,624 - INFO - execute_node completed (score=0.0).
+2026-08-30 20:14:24,626 - INFO - Running validate_node (validate_iteration=0)...
+2026-08-30 20:14:24,631 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:14:26,256 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:14:26,258 - INFO - validate_node: needs_regeneration=False grounded=True rubric_consistent=True -> done
+2026-08-30 20:18:14,614 - INFO - graph.start thread_id=558b739ffc714e358fd6a05828757f22
+2026-08-30 20:18:14,671 - INFO - Running plan_node...
+2026-08-30 20:18:14,679 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:18:20,238 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:18:20,240 - INFO - plan_node completed.
+2026-08-30 20:18:20,245 - INFO - Running followup_gate_node (iteration=0)...
+2026-08-30 20:18:20,252 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:18:22,842 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:18:22,846 - INFO - followup_gate_node: proceeding to scoring.
+2026-08-30 20:18:22,848 - INFO - Running execute_node...
+2026-08-30 20:18:22,855 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:18:29,548 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:18:29,551 - INFO - execute_node completed (score=7.2).
+2026-08-30 20:18:29,553 - INFO - Running validate_node (validate_iteration=0)...
+2026-08-30 20:18:29,557 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:18:30,797 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:18:30,798 - INFO - validate_node: needs_regeneration=False grounded=True rubric_consistent=True -> done
+2026-08-30 20:27:12,934 - INFO - graph.start thread_id=8d5c1e42c65147b89a277e6dd125a783
+2026-08-30 20:27:12,960 - INFO - Running plan_node...
+2026-08-30 20:27:12,970 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:27:18,518 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:27:18,519 - INFO - plan_node completed.
+2026-08-30 20:27:18,523 - INFO - Running followup_gate_node (iteration=0)...
+2026-08-30 20:27:18,530 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:27:21,317 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:27:21,319 - INFO - followup_gate_node: follow-up required.
+2026-08-30 20:27:21,321 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-30 20:27:33,366 - INFO - graph.resume thread_id=8d5c1e42c65147b89a277e6dd125a783
+2026-08-30 20:27:33,373 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-30 20:27:33,376 - INFO - Running followup_gate_node (iteration=1)...
+2026-08-30 20:27:33,382 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:27:36,173 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:27:36,176 - INFO - followup_gate_node: proceeding to scoring.
+2026-08-30 20:27:36,178 - INFO - Running execute_node...
+2026-08-30 20:27:36,183 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:27:41,460 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:27:41,462 - INFO - execute_node completed (score=0.0).
+2026-08-30 20:27:41,464 - INFO - Running validate_node (validate_iteration=0)...
+2026-08-30 20:27:41,467 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:27:42,950 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:27:42,951 - INFO - validate_node: needs_regeneration=False grounded=True rubric_consistent=True -> done
+2026-08-30 20:28:08,118 - INFO - graph.start thread_id=8e158010d707469b914fbe81ade9daaf
+2026-08-30 20:28:08,133 - INFO - Running plan_node...
+2026-08-30 20:28:08,140 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:28:13,451 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:28:13,453 - INFO - plan_node completed.
+2026-08-30 20:28:13,456 - INFO - Running followup_gate_node (iteration=0)...
+2026-08-30 20:28:13,462 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:28:16,646 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:28:16,650 - INFO - followup_gate_node: proceeding to scoring.
+2026-08-30 20:28:16,653 - INFO - Running execute_node...
+2026-08-30 20:28:16,660 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:28:23,299 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:28:23,303 - INFO - execute_node completed (score=6.8).
+2026-08-30 20:28:23,304 - INFO - Running validate_node (validate_iteration=0)...
+2026-08-30 20:28:23,308 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-30 20:28:24,413 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-30 20:28:24,415 - INFO - validate_node: needs_regeneration=False grounded=True rubric_consistent=True -> done
