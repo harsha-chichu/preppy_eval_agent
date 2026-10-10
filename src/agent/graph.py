@@ -41,6 +41,7 @@ from src.agent.nodes import (
     validate_node,
 )
 from src.agent.state import AgentState, EvalStatus, UserInput
+from src.config.tracing import record_outcome, resume_input, start_input, trace_run
 
 # Our custom state types must be on the checkpoint deserialization allowlist -
 # unregistered types are only warned about today but will be blocked by a
@@ -128,8 +129,11 @@ def start(user_input: UserInput, thread_id: str | None = None) -> dict:
     thread_id = thread_id or uuid4().hex
     config = {"configurable": {"thread_id": thread_id}}
     logger.info("graph.start thread_id=%s", thread_id)
-    out = _GRAPH.invoke(AgentState(input=user_input), config)
-    return _package(thread_id, out)
+    with trace_run(thread_id, user_input, "start", start_input(user_input)) as root:
+        out = _GRAPH.invoke(AgentState(input=user_input), config)
+        packaged = _package(thread_id, out)
+        _record(root, packaged)
+    return packaged
 
 
 def resume(thread_id: str, answer: str | None = None, audio_path: str | None = None) -> dict:
@@ -143,5 +147,19 @@ def resume(thread_id: str, answer: str | None = None, audio_path: str | None = N
     config = {"configurable": {"thread_id": thread_id}}
     logger.info("graph.resume thread_id=%s audio=%s", thread_id, bool(audio_path))
     payload = {"audio_path": audio_path} if audio_path else answer
-    out = _GRAPH.invoke(Command(resume=payload), config)
-    return _package(thread_id, out)
+    values = _GRAPH.get_state(config).values
+    run_input = resume_input(_get(values, "followup_question"), answer, audio_path)
+    with trace_run(thread_id, _get(values, "input"), "followup", run_input) as root:
+        out = _GRAPH.invoke(Command(resume=payload), config)
+        packaged = _package(thread_id, out)
+        _record(root, packaged)
+    return packaged
+
+
+def _record(root, packaged: dict) -> None:
+    record_outcome(
+        root,
+        evaluation_result=packaged.get("evaluation_result"),
+        review_result=packaged.get("review_result"),
+        followup_question=packaged.get("followup_question"),
+    )

@@ -2,6 +2,7 @@ from logger import logger
 
 from src.agent.state import AgentState, ReviewResult
 from src.config.client import call_structured_llm
+from src.config.tracing import traced_node
 from src.prompts import VALIDATE_PROMPT
 
 
@@ -20,6 +21,7 @@ def should_regenerate(state: AgentState) -> bool:
     return failed and state.validate_iteration < state.max_validate_iterations
 
 
+@traced_node("review-evaluation", as_type="evaluator")
 def validate_node(state: AgentState) -> dict:
     """Audit the EvaluationResult against the plan.
 
@@ -54,7 +56,7 @@ def validate_node(state: AgentState) -> dict:
         weaknesses=result.weaknesses,
         followup_evaluation=result.followup_evaluation,
     )
-    review = call_structured_llm(prompt, ReviewResult, max_tokens=1200)
+    review = call_structured_llm(prompt, ReviewResult, name="review-evaluation", max_tokens=1200)
 
     next_iteration = state.validate_iteration + 1
     updated = state.model_copy(update={"review_result": review, "validate_iteration": next_iteration})

@@ -5,6 +5,7 @@ import sys
 
 from src.agent.graph import resume, start
 from src.agent.state import Difficulty, EvalStatus, UserInput
+from src.config.tracing import langfuse
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -68,6 +69,7 @@ def main() -> None:
 
     _print_result(res["evaluation_result"])
     _print_review(res.get("review_result"))
+    langfuse.flush()  # short-lived script: send buffered traces before exit
 
 
 if __name__ == "__main__":

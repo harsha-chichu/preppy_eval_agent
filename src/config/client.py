@@ -6,6 +6,7 @@ from typing import Type, TypeVar
 from pydantic import BaseModel
 
 from src.config.constants import ANTHROPIC_API_KEY, GEMINI_API_KEY, GEMINI_MODEL, MODEL
+from src.config.tracing import trace_generation
 from litellm import completion
 
 # Validate required keys
@@ -15,22 +16,33 @@ if not ANTHROPIC_API_KEY:
 T = TypeVar("T", bound=BaseModel)
 
 
+def _complete(name: str, model: str, messages: list, temperature: float, max_tokens: int, attempt: int = 1, **kwargs):
+    """``litellm.completion`` recorded as a Langfuse generation named ``name``."""
+    with trace_generation(name, model, messages, temperature, max_tokens, attempt) as record:
+        response = completion(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            **kwargs,
+        )
+        record(response)
+    return response
+
+
 def call_llm(
     prompt: str,
+    name: str,
     temperature: float = 0.5,
     max_tokens: int = 1000,
 ):
-    response = completion(
-        model=MODEL,
-        messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
+    response = _complete(
+        name,
+        MODEL,
+        [{"role": "user", "content": prompt}],
+        temperature,
+        max_tokens,
         api_key=ANTHROPIC_API_KEY,
-        temperature=temperature,
-        max_tokens=max_tokens,
     )
 
     return response.choices[0].message.content
@@ -39,6 +51,7 @@ def call_llm(
 def call_structured_llm(
     prompt: str,
     schema: Type[T],
+    name: str,
     temperature: float = 0.2,
     max_tokens: int = 1500,
 ) -> T:
@@ -49,21 +62,23 @@ def call_structured_llm(
     once with the schema spelled out in the prompt.
     """
     messages = [{"role": "user", "content": prompt}]
-    response = completion(
-        model=MODEL,
-        messages=messages,
+    response = _complete(
+        name,
+        MODEL,
+        messages,
+        temperature,
+        max_tokens,
         api_key=ANTHROPIC_API_KEY,
-        temperature=temperature,
-        max_tokens=max_tokens,
         response_format=schema,
     )
     content = response.choices[0].message.content
     try:
         return schema.model_validate_json(content)
     except ValueError:
-        retry = completion(
-            model=MODEL,
-            messages=messages
+        retry = _complete(
+            name,
+            MODEL,
+            messages
             + [
                 {
                     "role": "user",
@@ -73,9 +88,10 @@ def call_structured_llm(
                     ),
                 }
             ],
+            temperature,
+            max_tokens,
+            attempt=2,
             api_key=ANTHROPIC_API_KEY,
-            temperature=temperature,
-            max_tokens=max_tokens,
             response_format=schema,
         )
         return schema.model_validate_json(retry.choices[0].message.content)
@@ -95,6 +111,7 @@ def call_gemini_audio(
     prompt: str,
     audio_path: str,
     schema: Type[T],
+    name: str = "transcribe-and-assess-audio",
     temperature: float = 1.0,
     max_tokens: int = 1500,
 ) -> T:
@@ -120,21 +137,23 @@ def call_gemini_audio(
             "content": [{"type": "text", "text": prompt}, audio_part],
         }
     ]
-    response = completion(
-        model=GEMINI_MODEL,
-        messages=messages,
+    response = _complete(
+        name,
+        GEMINI_MODEL,
+        messages,
+        temperature,
+        max_tokens,
         api_key=GEMINI_API_KEY,
-        temperature=temperature,
-        max_tokens=max_tokens,
         response_format=schema,
     )
     content = response.choices[0].message.content
     try:
         return schema.model_validate_json(content)
     except ValueError:
-        retry = completion(
-            model=GEMINI_MODEL,
-            messages=messages
+        retry = _complete(
+            name,
+            GEMINI_MODEL,
+            messages
             + [
                 {
                     "role": "user",
@@ -144,9 +163,10 @@ def call_gemini_audio(
                     ),
                 }
             ],
+            temperature,
+            max_tokens,
+            attempt=2,
             api_key=GEMINI_API_KEY,
-            temperature=temperature,
-            max_tokens=max_tokens,
             response_format=schema,
         )
         return schema.model_validate_json(retry.choices[0].message.content)

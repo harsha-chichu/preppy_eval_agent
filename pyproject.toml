@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.143.0",
+    "langfuse==4.17.0",
     "langgraph>=1.2.11",
     "litellm==1.98.0",
     "pydantic==2.13.5",

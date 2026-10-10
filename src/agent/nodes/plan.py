@@ -3,12 +3,14 @@ import sys
 from logger import logger
 from src.agent.state import AgentState, Difficulty, EvaluationPlan, UserInput
 from src.config.client import call_llm
+from src.config.tracing import traced_node
 from src.prompts import PLAN_PROMPT
 from src.utils import fetch_rubric
 
 sys.stdout.reconfigure(encoding="utf-8")
 
 
+@traced_node("plan-evaluation")
 def plan_node(state: AgentState) -> dict:
     """Build the evaluation plan.
 
@@ -25,7 +27,7 @@ def plan_node(state: AgentState) -> dict:
         criteria=rubric.criteria,
         weightings=rubric.weightings,
     )
-    plan_text = call_llm(prompt)
+    plan_text = call_llm(prompt, name="write-grading-plan")
 
     plan = EvaluationPlan(rubric=rubric, plan=plan_text)
     logger.info("plan_node completed.")

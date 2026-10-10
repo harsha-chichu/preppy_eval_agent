@@ -3,10 +3,12 @@ from langgraph.types import interrupt
 
 from src.agent.state import AgentState, AudioAnalysis, FollowupDecision
 from src.config.client import call_gemini_audio, call_structured_llm
+from src.config.tracing import traced_node
 from src.prompts import AUDIO_PROMPT, FOLLOWUP_PROMPT
 from src.utils import fetch_rubric
 
 
+@traced_node("decide-followup")
 def followup_gate_node(state: AgentState) -> dict:
     """Decide - before scoring - whether a clarifying follow-up is needed.
 
@@ -33,7 +35,7 @@ def followup_gate_node(state: AgentState) -> dict:
         criteria=rubric.criteria,
         weightings=rubric.weightings,
     )
-    decision = call_structured_llm(prompt, FollowupDecision)
+    decision = call_structured_llm(prompt, FollowupDecision, name="decide-followup")
 
     if decision.should_ask_followup and state.iteration < state.max_iterations:
         logger.info("followup_gate_node: follow-up required.")
@@ -69,6 +71,7 @@ def ask_followup_node(state: AgentState) -> dict:
             AUDIO_PROMPT.format(actual_question=state.followup_question or ""),
             reply["audio_path"],
             AudioAnalysis,
+            name="transcribe-followup-audio",
         )
         answer = analysis.transcript
     else:

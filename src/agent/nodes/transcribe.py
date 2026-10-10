@@ -3,11 +3,13 @@ import sys
 from logger import logger
 from src.agent.state import AgentState, AudioAnalysis, Difficulty, UserInput
 from src.config.client import call_gemini_audio
+from src.config.tracing import traced_node
 from src.prompts import AUDIO_PROMPT
 
 sys.stdout.reconfigure(encoding="utf-8")
 
 
+@traced_node("transcribe-answer", when=lambda state: bool(state.input.audio_path))
 def transcribe_node(state: AgentState) -> dict:
     """Transcribe + assess a spoken answer.
 

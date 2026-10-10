@@ -3,9 +3,11 @@ from logger import logger
 from src.agent.state import AgentState, EvaluationResult
 from src.config.client import call_structured_llm
 from src.config.constants import CONTENT_WEIGHT
+from src.config.tracing import traced_node
 from src.prompts import EXECUTE_PROMPT
 
 
+@traced_node("score-answer")
 def execute_node(state: AgentState) -> dict:
     """Run the full evaluation using the plan, rubric, and any follow-up answer."""
     logger.info("Running execute_node...")
@@ -27,7 +29,7 @@ def execute_node(state: AgentState) -> dict:
         weightings=rubric.weightings,
         plan=state.plan.plan,
     )
-    result = call_structured_llm(prompt, EvaluationResult, max_tokens=2000)
+    result = call_structured_llm(prompt, EvaluationResult, name="score-answer", max_tokens=2000)
 
     result.evaluation_plan_used = state.plan
 

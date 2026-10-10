@@ -27,6 +27,7 @@ from logger import logger
 from src.agent.graph import _GRAPH
 from src.agent.state import AgentState, Difficulty, UserInput
 from src.config import constants as _constants  # noqa: F401  (loads .env)
+from src.config.tracing import record_outcome, resume_input, start_input, trace_run
 
 TOKEN = os.getenv("EVAL_AGENT_TOKEN")
 if not TOKEN:
@@ -57,6 +58,7 @@ class Run:
     transcript: Optional[str] = None
     communication: Optional[dict] = None
     result: Optional[dict] = None
+    review: Optional[dict] = None
     error: Optional[str] = None
     decided: threading.Event = field(default_factory=threading.Event)
     updated_at: float = field(default_factory=time.time)
@@ -94,8 +96,21 @@ def _dump(value: Any) -> Any:
     return value.model_dump(mode="json") if hasattr(value, "model_dump") else value
 
 
-def _drive(thread_id: str, run: Run, graph_input: Any, cleanup: list[str]) -> None:
+def _drive(
+    thread_id: str, run: Run, graph_input: Any, cleanup: list[str], user_input: UserInput, segment: str, run_input: dict
+) -> None:
     """Stream the graph until it pauses for a follow-up or finishes."""
+    with trace_run(thread_id, user_input, segment, run_input) as root:
+        _stream(thread_id, run, graph_input, cleanup)
+        record_outcome(
+            root,
+            evaluation_result=run.result,
+            review_result=run.review,
+            followup_question=run.followup_question if run.status == "pending_followup" else None,
+        )
+
+
+def _stream(thread_id: str, run: Run, graph_input: Any, cleanup: list[str]) -> None:
     config = {"configurable": {"thread_id": thread_id}}
     try:
         for update in _GRAPH.stream(graph_input, config, stream_mode="updates"):
@@ -122,6 +137,8 @@ def _drive(thread_id: str, run: Run, graph_input: Any, cleanup: list[str]) -> No
                     result = _dump(values["evaluation_result"])
                     result.pop("evaluation_plan_used", None)
                     run.result = result
+                elif node == "validate" and values.get("review_result") is not None:
+                    run.review = _dump(values["review_result"])
 
         if run.status != "pending_followup":
             run.status = "completed" if run.result else "failed"
@@ -141,10 +158,20 @@ def _drive(thread_id: str, run: Run, graph_input: Any, cleanup: list[str]) -> No
                 pass
 
 
-def _start_segment(thread_id: str, run: Run, graph_input: Any, cleanup: list[str]) -> dict:
+def _start_segment(
+    thread_id: str, run: Run, graph_input: Any, cleanup: list[str], segment: str, run_input: Optional[dict] = None
+) -> dict:
+    config = {"configurable": {"thread_id": thread_id}}
+    if isinstance(graph_input, AgentState):
+        user_input = graph_input.input
+    else:
+        user_input = _GRAPH.get_state(config).values["input"]
+    run_input = run_input or start_input(user_input)
     run.decided = threading.Event()
     run.status = "running"
-    worker = threading.Thread(target=_drive, args=(thread_id, run, graph_input, cleanup), daemon=True)
+    worker = threading.Thread(
+        target=_drive, args=(thread_id, run, graph_input, cleanup, user_input, segment, run_input), daemon=True
+    )
     worker.start()
     run.decided.wait(DECISION_TIMEOUT_S)
     return run.snapshot(thread_id)
@@ -213,7 +240,7 @@ async def create_evaluation(
     with _LOCK:
         _RUNS[thread_id] = run
     cleanup = [audio_path] if audio_path else []
-    return _start_segment(thread_id, run, AgentState(input=user_input), cleanup)
+    return _start_segment(thread_id, run, AgentState(input=user_input), cleanup, "start")
 
 
 @app.post("/evaluations/{thread_id}/followup")
@@ -230,7 +257,8 @@ async def answer_followup(
         raise HTTPException(422, "provide answer or audio")
     payload = {"audio_path": audio_path} if audio_path else answer.strip()
     cleanup = [audio_path] if audio_path else []
-    return _start_segment(thread_id, run, Command(resume=payload), cleanup)
+    run_input = resume_input(run.followup_question, None if audio_path else answer.strip(), audio_path)
+    return _start_segment(thread_id, run, Command(resume=payload), cleanup, "followup", run_input)
 
 
 @app.post("/evaluations/{thread_id}/skip-followup")
@@ -241,6 +269,7 @@ def skip_followup(thread_id: str) -> dict:
     config = {"configurable": {"thread_id": thread_id}}
     values = _GRAPH.get_state(config).values
     max_iterations = values.get("max_iterations", 2) if isinstance(values, dict) else 2
+    run_input = resume_input(run.followup_question, "(skipped)", None)
     # Close the pending follow-up as if it had been answered and exhaust the
     # follow-up budget, so the gate proceeds straight to scoring.
     _GRAPH.update_state(
@@ -248,7 +277,7 @@ def skip_followup(thread_id: str) -> dict:
         {"awaiting_followup_answer": False, "iteration": max_iterations, "followup_question": None},
         as_node="ask_followup",
     )
-    return _start_segment(thread_id, run, None, [])
+    return _start_segment(thread_id, run, None, [], "skip-followup", run_input)
 
 
 @app.get("/evaluations/{thread_id}")
