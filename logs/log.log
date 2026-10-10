@@ -375,3 +375,334 @@ LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
 LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
 2026-08-31 01:35:09,387 - INFO - Wrapper: Completed Call, calling success_handler
 2026-08-31 01:35:09,389 - INFO - validate_node: needs_regeneration=False grounded=True rubric_consistent=True -> done
+2026-08-31 01:43:17,436 - INFO - graph.start thread_id=0fac6ad3af054cbcb7199de0bee12352
+2026-08-31 01:43:17,489 - INFO - Running transcribe_node on C:\Users\Dell\AppData\Local\Temp\tmpnakh7nrv.wav ...
+2026-08-31 01:43:17,743 - INFO - 
+LiteLLM completion() model= gemini-3.5-flash-lite; provider = gemini
+2026-08-31 01:43:17,744 - WARNING - DeprecationWarning: `temperature`, `top_p`, and `top_k` continue to function for Gemini 3+ (gemini-3.5-flash-lite) but are planned for removal in a future release. Move sampling guidance into the `system` instructions instead.
+2026-08-31 01:43:20,486 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:43:20,498 - INFO - transcribe_node completed (161 chars transcribed).
+2026-08-31 01:43:20,501 - INFO - Running followup_gate_node (iteration=0)...
+2026-08-31 01:43:20,543 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-31 01:43:23,779 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:43:23,781 - INFO - followup_gate_node: follow-up required.
+2026-08-31 01:43:23,783 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-31 01:44:05,978 - INFO - graph.resume thread_id=0fac6ad3af054cbcb7199de0bee12352 audio=True
+2026-08-31 01:44:05,982 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-08-31 01:44:05,983 - INFO - ask_followup_node: transcribing spoken follow-up answer.
+2026-08-31 01:44:06,009 - INFO - 
+LiteLLM completion() model= gemini-3.5-flash-lite; provider = gemini
+2026-08-31 01:44:06,010 - WARNING - DeprecationWarning: `temperature`, `top_p`, and `top_k` continue to function for Gemini 3+ (gemini-3.5-flash-lite) but are planned for removal in a future release. Move sampling guidance into the `system` instructions instead.
+2026-08-31 01:44:08,928 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:44:08,935 - INFO - Running followup_gate_node (iteration=1)...
+2026-08-31 01:44:08,937 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-31 01:44:12,572 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:44:12,590 - INFO - followup_gate_node: proceeding to scoring.
+2026-08-31 01:44:12,592 - INFO - Running plan_node...
+2026-08-31 01:44:12,594 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-31 01:44:18,110 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:44:18,111 - INFO - plan_node completed.
+2026-08-31 01:44:18,113 - INFO - Running execute_node...
+2026-08-31 01:44:18,120 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-31 01:44:26,614 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:44:26,616 - INFO - execute_node completed (score=3.8, overall=4.34).
+2026-08-31 01:44:26,618 - INFO - Running validate_node (validate_iteration=0)...
+2026-08-31 01:44:26,620 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-08-31 01:44:27,803 - INFO - Wrapper: Completed Call, calling success_handler
+2026-08-31 01:44:27,804 - INFO - validate_node: needs_regeneration=False grounded=True rubric_consistent=True -> done
+2026-09-02 00:20:16,869 - INFO - graph.start thread_id=f58328ab45e04176a99921363a41fa01
+2026-09-02 00:20:16,924 - INFO - Running transcribe_node on C:\Users\Dell\AppData\Local\Temp\tmp5g1sn1lr.wav ...
+2026-09-02 00:20:17,067 - INFO - 
+LiteLLM completion() model= gemini-3.5-flash-lite; provider = gemini
+2026-09-02 00:20:17,069 - WARNING - DeprecationWarning: `temperature`, `top_p`, and `top_k` continue to function for Gemini 3+ (gemini-3.5-flash-lite) but are planned for removal in a future release. Move sampling guidance into the `system` instructions instead.
+2026-09-02 00:20:24,836 - INFO - Wrapper: Completed Call, calling success_handler
+2026-09-02 00:20:24,851 - INFO - transcribe_node completed (262 chars transcribed).
+2026-09-02 00:20:24,853 - INFO - Running followup_gate_node (iteration=0)...
+2026-09-02 00:20:24,917 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-09-02 00:20:29,864 - INFO - Wrapper: Completed Call, calling success_handler
+2026-09-02 00:20:29,866 - INFO - followup_gate_node: follow-up required.
+2026-09-02 00:20:29,869 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-09-02 00:21:20,352 - INFO - graph.resume thread_id=f58328ab45e04176a99921363a41fa01 audio=False
+2026-09-02 00:21:20,366 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-09-02 00:21:20,368 - INFO - Running followup_gate_node (iteration=1)...
+2026-09-02 00:21:20,379 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-09-02 00:21:23,413 - INFO - Wrapper: Completed Call, calling success_handler
+2026-09-02 00:21:23,416 - INFO - followup_gate_node: proceeding to scoring.
+2026-09-02 00:21:23,420 - INFO - Running plan_node...
+2026-09-02 00:21:23,422 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-09-02 00:21:28,750 - INFO - Wrapper: Completed Call, calling success_handler
+2026-09-02 00:21:28,751 - INFO - plan_node completed.
+2026-09-02 00:21:28,753 - INFO - Running execute_node...
+2026-09-02 00:21:28,762 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-09-02 00:21:52,034 - INFO - Wrapper: Completed Call, calling success_handler
+2026-09-02 00:21:52,041 - INFO - execute_node completed (score=5.2, overall=5.58).
+2026-09-02 00:21:52,043 - INFO - Running validate_node (validate_iteration=0)...
+2026-09-02 00:21:52,050 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-09-02 00:21:54,212 - INFO - Wrapper: Completed Call, calling success_handler
+2026-09-02 00:21:54,214 - INFO - validate_node: needs_regeneration=False grounded=True rubric_consistent=True -> done
+2026-09-03 07:12:23,615 - ERROR - Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\Dell\AppData\Roaming\uv\python\cpython-3.13.7-windows-x86_64-none\Lib\asyncio\events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dell\AppData\Roaming\uv\python\cpython-3.13.7-windows-x86_64-none\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+2026-09-03 07:12:24,825 - ERROR - Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\Dell\AppData\Roaming\uv\python\cpython-3.13.7-windows-x86_64-none\Lib\asyncio\events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dell\AppData\Roaming\uv\python\cpython-3.13.7-windows-x86_64-none\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+2026-09-03 07:12:24,839 - ERROR - Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\Dell\AppData\Roaming\uv\python\cpython-3.13.7-windows-x86_64-none\Lib\asyncio\events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dell\AppData\Roaming\uv\python\cpython-3.13.7-windows-x86_64-none\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+2026-09-03 20:29:38,708 - ERROR - Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\Dell\AppData\Roaming\uv\python\cpython-3.13.7-windows-x86_64-none\Lib\asyncio\events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dell\AppData\Roaming\uv\python\cpython-3.13.7-windows-x86_64-none\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+2026-10-09 06:24:30,721 - INFO - transcribe_node: no audio, skipping.
+2026-10-09 06:24:30,722 - INFO - Running followup_gate_node (iteration=0)...
+2026-10-09 06:24:30,774 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 06:24:31,640 - ERROR - eval run 30b06f5680524017b9ea9df9840f5d25 failed
+Traceback (most recent call last):
+  File "C:\My Stuff\LMS\agents\eval_agent\.venv\Lib\site-packages\litellm\llms\anthropic\chat\handler.py", line 477, in completion
+    response: Final = client.post(
+                      ~~~~~~~~~~~^
+        api_base,
+        ^^^^^^^^^
+    ...<3 lines>...
+        logging_obj=logging_obj,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\My Stuff\LMS\agents\eval_agent\.venv\Lib\site-packages\litellm\llms\custom_httpx\http_handler.py", line 1270, in post
+    _raise_masked_sync_error(e, stream)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\My Stuff\LMS\agents\eval_agent\.venv\Lib\site-packages\litellm\llms\custom_httpx\http_handler.py", line 467, in _raise_masked_sync_error
+    raise MaskedHTTPStatusError(e, message=_text, text=_text) from None
+litellm.llms.custom_httpx.http_handler.MaskedHTTPStatusError: Client error '401 Unauthorized' for url 'https://api.anthropic.com/v1/messages'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\My Stuff\LMS\agents\eval_agent\.venv\Lib\site-packages\litellm\main.py", line 5661, in completion
+    response = _complete_anthropic(_dispatch_ctx)
+  File "C:\My Stuff\LMS\agents\eval_agent\.venv\Lib\site-packages\litellm\main.py", line 2764, in _complete_anthropic
+    response: Final = anthropic_chat_completions.completion(
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        model=model,
+        ^^^^^^^^^^^^
+    ...<15 lines>...
+        custom_llm_provider=custom_llm_provider,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\My Stuff\LMS\agents\eval_agent\.venv\Lib\site-packages\litellm\llms\anthropic\chat\handler.py", line 493, in completion
+    raise AnthropicError(
+    ...<3 lines>...
+    )
+litellm.llms.anthropic.common_utils.AnthropicError: {"type":"error","error":{"type":"authentication_error","message":"invalid x-api-key"},"request_id":null}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\My Stuff\LMS\agents\eval_agent\server.py", line 101, in _drive
+    for update in _GRAPH.stream(graph_input, config, stream_mode="updates"):
+                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\My Stuff\LMS\agents\eval_agent\.venv\Lib\site-packages\langgraph\pregel\main.py", line 2967, in stream
+    for _ in runner.tick(
+             ~~~~~~~~~~~^
+        [t for t in loop.tasks.values() if not t.writes],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        schedule_task=loop.accept_push,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+  File "C:\My Stuff\LMS\agents\eval_agent\.venv\Lib\site-packages\langgraph\pregel\_runner.py", line 207, in tick
+    run_with_retry(
+    ~~~~~~~~~~~~~~^
+        t,
+        ^^
+    ...<10 lines>...
+        },
+        ^^
+    )
+    ^
+  File "C:\My Stuff\LMS\agents\eval_agent\.venv\Lib\site-packages\langgraph\pregel\_retry.py", line 617, in run_with_retry
+    return task.proc.invoke(task.input, config)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\My Stuff\LMS\agents\eval_agent\.venv\Lib\site-packages\langgraph\_internal\_runnable.py", line 707, in invoke
+    input = context.run(step.invoke, input, config, **kwargs)
+  File "C:\My Stuff\LMS\agents\eval_agent\.venv\Lib\site-packages\langgraph\_internal\_runnable.py", line 447, in invoke
+    ret = self.func(*args, **kwargs)
+  File "C:\My Stuff\LMS\agents\eval_agent\src\agent\nodes\followup.py", line 36, in followup_gate_node
+    decision = call_structured_llm(prompt, FollowupDecision)
+  File "C:\My Stuff\LMS\agents\eval_agent\src\config\client.py", line 52, in call_structured_llm
+    response = completion(
+        model=MODEL,
+    ...<4 lines>...
+        response_format=schema,
+    )
+  File "C:\My Stuff\LMS\agents\eval_agent\.venv\Lib\site-packages\litellm\utils.py", line 1648, in wrapper
+    raise e
+  File "C:\My Stuff\LMS\agents\eval_agent\.venv\Lib\site-packages\litellm\utils.py", line 1494, in wrapper
+    result = original_function(*args, **kwargs)
+  File "C:\My Stuff\LMS\agents\eval_agent\.venv\Lib\site-packages\litellm\main.py", line 5777, in completion
+    raise exception_type(
+          ~~~~~~~~~~~~~~^
+        model=model,
+        ^^^^^^^^^^^^
+    ...<3 lines>...
+        extra_kwargs=kwargs,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\My Stuff\LMS\agents\eval_agent\.venv\Lib\site-packages\litellm\litellm_core_utils\exception_mapping_utils.py", line 2510, in exception_type
+    raise e  # it's already mapped
+    ^^^^^^^
+  File "C:\My Stuff\LMS\agents\eval_agent\.venv\Lib\site-packages\litellm\litellm_core_utils\exception_mapping_utils.py", line 2289, in exception_type
+    _map_anthropic_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        model=model,
+        ^^^^^^^^^^^^
+    ...<5 lines>...
+        extra_information=extra_information,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\My Stuff\LMS\agents\eval_agent\.venv\Lib\site-packages\litellm\litellm_core_utils\exception_mapping_utils.py", line 548, in _map_anthropic_exception
+    raise AuthenticationError(
+    ...<3 lines>...
+    )
+litellm.exceptions.AuthenticationError: litellm.AuthenticationError: AnthropicException - {"type":"error","error":{"type":"authentication_error","message":"invalid x-api-key"},"request_id":null}
+During task with name 'followup_gate' and id '92ade1cf-3466-33d8-72f2-7e8e78934519'
+2026-10-09 06:24:59,001 - INFO - transcribe_node: no audio, skipping.
+2026-10-09 06:24:59,002 - INFO - Running followup_gate_node (iteration=0)...
+2026-10-09 06:24:59,034 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 06:25:03,548 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 06:25:03,555 - INFO - followup_gate_node: follow-up required.
+2026-10-09 06:25:03,556 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-10-09 06:25:03,826 - INFO - Running followup_gate_node (iteration=2)...
+2026-10-09 06:25:03,827 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 06:25:07,050 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 06:25:07,051 - INFO - followup_gate_node: proceeding to scoring.
+2026-10-09 06:25:07,053 - INFO - Running plan_node...
+2026-10-09 06:25:07,054 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 06:25:12,586 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 06:25:12,587 - INFO - plan_node completed.
+2026-10-09 06:25:12,589 - INFO - Running execute_node...
+2026-10-09 06:25:12,592 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 06:25:31,597 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 06:25:31,601 - INFO - execute_node completed (score=3.2, overall=None).
+2026-10-09 06:25:31,603 - INFO - Running validate_node (validate_iteration=0)...
+2026-10-09 06:25:31,604 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 06:25:34,111 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 06:25:34,112 - INFO - validate_node: needs_regeneration=False grounded=True rubric_consistent=True -> done
+2026-10-09 06:59:42,713 - INFO - transcribe_node: no audio, skipping.
+2026-10-09 06:59:42,718 - INFO - Running followup_gate_node (iteration=0)...
+2026-10-09 06:59:42,933 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 06:59:47,108 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 06:59:47,133 - INFO - followup_gate_node: follow-up required.
+2026-10-09 06:59:47,136 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-10-09 06:59:47,957 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-10-09 06:59:47,958 - INFO - Running followup_gate_node (iteration=1)...
+2026-10-09 06:59:47,960 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 06:59:51,549 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 06:59:51,552 - INFO - followup_gate_node: proceeding to scoring.
+2026-10-09 06:59:51,553 - INFO - Running plan_node...
+2026-10-09 06:59:51,555 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 06:59:53,114 - INFO - Running transcribe_node on C:\Users\Dell\AppData\Local\Temp\tmpemb7sxf4.wav ...
+2026-10-09 06:59:53,146 - INFO - 
+LiteLLM completion() model= gemini-3.5-flash-lite; provider = gemini
+2026-10-09 06:59:53,147 - WARNING - DeprecationWarning: `temperature`, `top_p`, and `top_k` continue to function for Gemini 3+ (gemini-3.5-flash-lite) but are planned for removal in a future release. Move sampling guidance into the `system` instructions instead.
+2026-10-09 06:59:56,401 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 06:59:56,405 - INFO - transcribe_node completed (274 chars transcribed).
+2026-10-09 06:59:56,411 - INFO - Running followup_gate_node (iteration=0)...
+2026-10-09 06:59:56,414 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 06:59:57,097 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 06:59:57,098 - INFO - plan_node completed.
+2026-10-09 06:59:57,100 - INFO - Running execute_node...
+2026-10-09 06:59:57,103 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 06:59:59,787 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 06:59:59,788 - INFO - followup_gate_node: follow-up required.
+2026-10-09 06:59:59,789 - INFO - Running ask_followup_node - interrupting for follow-up answer.
+2026-10-09 07:00:00,448 - INFO - Running followup_gate_node (iteration=2)...
+2026-10-09 07:00:00,450 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 07:00:03,446 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 07:00:03,447 - INFO - followup_gate_node: proceeding to scoring.
+2026-10-09 07:00:03,449 - INFO - Running plan_node...
+2026-10-09 07:00:03,450 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 07:00:07,589 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 07:00:07,591 - INFO - execute_node completed (score=2.5, overall=None).
+2026-10-09 07:00:07,593 - INFO - Running validate_node (validate_iteration=0)...
+2026-10-09 07:00:07,595 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 07:00:08,712 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 07:00:08,713 - INFO - plan_node completed.
+2026-10-09 07:00:08,715 - INFO - Running execute_node...
+2026-10-09 07:00:08,717 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 07:00:14,632 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 07:00:14,633 - INFO - validate_node: needs_regeneration=True grounded=False rubric_consistent=False -> re-execute
+2026-10-09 07:00:14,634 - INFO - Running execute_node...
+2026-10-09 07:00:14,638 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 07:00:16,763 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 07:00:16,764 - INFO - execute_node completed (score=4.2, overall=5.29).
+2026-10-09 07:00:16,765 - INFO - Running validate_node (validate_iteration=0)...
+2026-10-09 07:00:16,767 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 07:00:18,320 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 07:00:18,320 - INFO - validate_node: needs_regeneration=False grounded=True rubric_consistent=True -> done
+2026-10-09 07:00:25,506 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 07:00:25,507 - INFO - execute_node completed (score=2.5, overall=None).
+2026-10-09 07:00:25,508 - INFO - Running validate_node (validate_iteration=1)...
+2026-10-09 07:00:25,510 - INFO - 
+LiteLLM completion() model= claude-haiku-4-5-20251001; provider = anthropic
+2026-10-09 07:00:32,711 - INFO - Wrapper: Completed Call, calling success_handler
+2026-10-09 07:00:32,711 - INFO - validate_node: needs_regeneration=True grounded=False rubric_consistent=False -> done
