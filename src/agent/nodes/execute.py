@@ -29,7 +29,7 @@ def execute_node(state: AgentState) -> dict:
         weightings=rubric.weightings,
         plan=state.plan.plan,
     )
-    result = call_structured_llm(prompt, EvaluationResult, name="score-answer", max_tokens=2000)
+    result = call_structured_llm(prompt, EvaluationResult, name="score-answer", max_tokens=3000)
 
     result.evaluation_plan_used = state.plan
 

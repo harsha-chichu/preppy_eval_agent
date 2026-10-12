@@ -22,6 +22,9 @@ The evaluation that was produced:
 - weaknesses: {weaknesses}
 - followup_evaluation: {followup_evaluation}
 
+The evaluator also wrote a suggested model answer, which is not shown here and
+is not a claim about the candidate; ignore it.
+
 The evaluator was NOT required to output per-criterion sub-scores or to show its
 arithmetic. Do not fault it for that. Judge only whether the result is
 defensible.

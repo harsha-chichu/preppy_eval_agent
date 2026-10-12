@@ -81,6 +81,10 @@ class EvaluationResult(BaseModel):
     followup_evaluation: Optional[str] = Field(
         default=None, description="Evaluation specifically for the followup answer, if provided"
     )
+    suggested_answer: Optional[str] = Field(
+        default=None,
+        description="A model answer to the question that applies the feedback and fixes the weaknesses above",
+    )
     communication_evaluation: Optional[CommunicationEvaluation] = Field(
         default=None, description="Evaluation of communication skills (grammar, pronunciation, filler words, pauses, etc.)"
     )
