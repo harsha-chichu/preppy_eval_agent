@@ -26,5 +26,7 @@ Return JSON matching the EvaluationResult schema:
   right and apply every point in feedback and weaknesses - e.g. if a weakness
   is missing edge cases, the suggested answer covers them. If a follow-up was
   asked, fold its answer in so it is no longer needed.
+- suggested_points: the suggested answer as 3-5 short key points (under 12
+  words each) the candidate can remember before the real interview.
 Leave communication_evaluation and overall_score null.
 """
