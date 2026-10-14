@@ -59,13 +59,16 @@ def ask_followup_node(state: AgentState) -> dict:
 
     ``interrupt`` suspends execution; the value passed to ``resume`` becomes the
     return of this call when the graph is re-invoked. The reply may be a plain
-    text string or ``{"audio_path": "..."}`` for a spoken follow-up answer, which
-    is transcribed here so downstream nodes see a normal text answer.
+    text string, or ``{"audio_path": "...", "answer": "..." | None}`` for a spoken
+    follow-up answer. Text the user reviewed is used as-is; a recording without
+    text is transcribed here so downstream nodes see a normal text answer.
     """
     logger.info("Running ask_followup_node - interrupting for follow-up answer.")
     reply = interrupt({"followup_question": state.followup_question})
 
-    if isinstance(reply, dict) and reply.get("audio_path"):
+    if isinstance(reply, dict) and reply.get("answer"):
+        answer = reply["answer"]
+    elif isinstance(reply, dict) and reply.get("audio_path"):
         logger.info("ask_followup_node: transcribing spoken follow-up answer.")
         analysis = call_gemini_audio(
             AUDIO_PROMPT.format(actual_question=state.followup_question or ""),
