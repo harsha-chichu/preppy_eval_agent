@@ -139,7 +139,7 @@ def start_input(user_input) -> dict:
 
 def resume_input(followup_question: str | None, answer: str | None, audio_path: str | None) -> dict:
     """Trace input for a resumed run (answer to a follow-up, or a skip)."""
-    if audio_path:
+    if audio_path and not answer:
         answer = "(voice answer - see transcribe-followup-audio)"
     return {"followup_question": followup_question, "followup_answer": answer}
 

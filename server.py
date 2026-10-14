@@ -229,8 +229,9 @@ async def create_evaluation(
 
     user_input = UserInput(
         actual_question=question,
-        # a recording takes precedence; its transcript becomes the answer
-        user_response=None if audio_path else answer.strip(),
+        # Text the user reviewed wins; with a recording alone its transcript becomes
+        # the answer. Either way the recording is still used for delivery scores.
+        user_response=answer.strip() if answer and answer.strip() else None,
         audio_path=audio_path,
         difficulty=difficulty,
         domain=domain,
@@ -255,9 +256,10 @@ async def answer_followup(
     audio_path = await _save_audio(audio)
     if not audio_path and not (answer and answer.strip()):
         raise HTTPException(422, "provide answer or audio")
-    payload = {"audio_path": audio_path} if audio_path else answer.strip()
+    text = answer.strip() if answer and answer.strip() else None
+    payload = {"audio_path": audio_path, "answer": text} if audio_path else text
     cleanup = [audio_path] if audio_path else []
-    run_input = resume_input(run.followup_question, None if audio_path else answer.strip(), audio_path)
+    run_input = resume_input(run.followup_question, text, audio_path)
     return _start_segment(thread_id, run, Command(resume=payload), cleanup, "followup", run_input)
 
 
