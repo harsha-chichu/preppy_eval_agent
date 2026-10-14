@@ -85,6 +85,10 @@ class EvaluationResult(BaseModel):
         default=None,
         description="A model answer to the question that applies the feedback and fixes the weaknesses above",
     )
+    suggested_points: list[str] = Field(
+        default_factory=list,
+        description="3-5 short key points a strong answer covers (the suggested answer in brief)",
+    )
     communication_evaluation: Optional[CommunicationEvaluation] = Field(
         default=None, description="Evaluation of communication skills (grammar, pronunciation, filler words, pauses, etc.)"
     )
