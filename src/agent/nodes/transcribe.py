@@ -14,9 +14,11 @@ def transcribe_node(state: AgentState) -> dict:
     """Transcribe + assess a spoken answer.
 
     No-op for typed answers. For voice answers it makes one Gemini call that
-    returns both the transcript and the delivery assessment; the transcript is
-    written into ``input.user_response`` so every downstream node scores the
-    content exactly as it would a typed answer.
+    returns both the transcript and the delivery assessment. If the caller sent
+    text with the recording (the user reviewed/edited the transcript), that text
+    stays the answer and the audio is only used for the delivery assessment;
+    otherwise Gemini's transcript is written into ``input.user_response`` so every
+    downstream node scores the content exactly as it would a typed answer.
     """
     if not state.input.audio_path:
         logger.info("transcribe_node: no audio, skipping.")
@@ -29,8 +31,11 @@ def transcribe_node(state: AgentState) -> dict:
         AudioAnalysis,
     )
 
-    updated_input = state.input.model_copy(update={"user_response": analysis.transcript})
     logger.info("transcribe_node completed (%d chars transcribed).", len(analysis.transcript))
+    if state.input.user_response:
+        # The user's reviewed text is the answer; the audio was for delivery only.
+        return {"transcript": state.input.user_response, "communication_evaluation": analysis.communication}
+    updated_input = state.input.model_copy(update={"user_response": analysis.transcript})
     return {
         "input": updated_input,
         "transcript": analysis.transcript,
