@@ -5,13 +5,13 @@ from typing import Type, TypeVar
 
 from pydantic import BaseModel
 
-from src.config.constants import ANTHROPIC_API_KEY, GEMINI_API_KEY, GEMINI_MODEL, MODEL
+from src.config.constants import GEMINI_API_KEY, GEMINI_MODEL, MODEL
 from src.config.tracing import trace_generation
 from litellm import completion
 
-# Validate required keys
-if not ANTHROPIC_API_KEY:
-    raise RuntimeError("ANTHROPIC_API_KEY is not set")
+# Validate required key — GEMINI_API_KEY now covers both text and audio calls.
+if not GEMINI_API_KEY:
+    raise RuntimeError("GEMINI_API_KEY is not set")
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -42,7 +42,7 @@ def call_llm(
         [{"role": "user", "content": prompt}],
         temperature,
         max_tokens,
-        api_key=ANTHROPIC_API_KEY,
+        api_key=GEMINI_API_KEY,
     )
 
     return response.choices[0].message.content
@@ -68,7 +68,7 @@ def call_structured_llm(
         messages,
         temperature,
         max_tokens,
-        api_key=ANTHROPIC_API_KEY,
+        api_key=GEMINI_API_KEY,
         response_format=schema,
     )
     content = response.choices[0].message.content
@@ -91,7 +91,7 @@ def call_structured_llm(
             temperature,
             max_tokens,
             attempt=2,
-            api_key=ANTHROPIC_API_KEY,
+            api_key=GEMINI_API_KEY,
             response_format=schema,
         )
         return schema.model_validate_json(retry.choices[0].message.content)
