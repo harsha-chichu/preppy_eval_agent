@@ -7,6 +7,7 @@ Trace layout (one trace per graph segment, grouped into a session per evaluation
     │   └── transcribe-and-assess-audio (generation, Gemini)
     ├── decide-followup (chain)
     │   └── decide-followup (generation)
+    ├── ask-followup (chain)
     ├── plan-evaluation (chain)
     │   └── write-grading-plan (generation)
     ├── score-answer (chain)
@@ -97,11 +98,15 @@ def trace_generation(name: str, model: str, messages: list, temperature: float, 
 
 
 @contextmanager
-def trace_run(thread_id: str, user_input, segment: str, run_input: dict) -> Iterator[Any]:
+def trace_run(
+    thread_id: str, user_input, segment: str, run_input: dict, *, user_id: str | None = None
+) -> Iterator[Any]:
     """Root observation for one graph segment (initial run or a resume).
 
     ``thread_id`` is the session id, so the first pass and any follow-up turns
     of the same evaluation show up together in the Sessions view.
+    ``user_id``, when provided, is attached so per-user analytics are available
+    in the Langfuse dashboard.
     """
     tags = [
         f"domain:{user_input.domain}",
@@ -119,6 +124,7 @@ def trace_run(thread_id: str, user_input, segment: str, run_input: dict) -> Iter
             trace_name=TRACE_NAME,
             tags=tags,
             metadata={"segment": segment},
+            user_id=user_id,
         ):
             yield root
 
@@ -146,6 +152,25 @@ def resume_input(followup_question: str | None, answer: str | None, audio_path: 
 
 def _field(obj, key):
     return obj.get(key) if isinstance(obj, dict) else getattr(obj, key, None)
+
+
+def score_intermediate(root, review_result, iteration: int) -> None:
+    """Record an intermediate validate-loop score.
+
+    Called after each ``validate_node`` run so the Langfuse Scores view shows
+    every retry attempt, not just the final verdict.  The score names include
+    the iteration number (e.g. ``grounded@1``, ``rubric-consistent@2``) to
+    distinguish them from the final scores.
+    """
+    if review_result is None:
+        return
+    suffix = f"@{iteration}"
+    for name, key in (("grounded", "is_grounded"), ("rubric-consistent", "is_rubric_consistent")):
+        root.score_trace(
+            name=f"{name}{suffix}",
+            value=float(bool(_field(review_result, key))),
+            data_type="BOOLEAN",
+        )
 
 
 def record_outcome(root, evaluation_result=None, review_result=None, followup_question=None) -> None:

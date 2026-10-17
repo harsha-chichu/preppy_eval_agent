@@ -27,7 +27,7 @@ from logger import logger
 from src.agent.graph import _GRAPH
 from src.agent.state import AgentState, Difficulty, UserInput
 from src.config import constants as _constants  # noqa: F401  (loads .env)
-from src.config.tracing import record_outcome, resume_input, start_input, trace_run
+from src.config.tracing import record_outcome, resume_input, score_intermediate, start_input, trace_run
 
 TOKEN = os.getenv("EVAL_AGENT_TOKEN")
 if not TOKEN:
@@ -101,7 +101,7 @@ def _drive(
 ) -> None:
     """Stream the graph until it pauses for a follow-up or finishes."""
     with trace_run(thread_id, user_input, segment, run_input) as root:
-        _stream(thread_id, run, graph_input, cleanup)
+        _stream(thread_id, run, graph_input, cleanup, root)
         record_outcome(
             root,
             evaluation_result=run.result,
@@ -110,7 +110,7 @@ def _drive(
         )
 
 
-def _stream(thread_id: str, run: Run, graph_input: Any, cleanup: list[str]) -> None:
+def _stream(thread_id: str, run: Run, graph_input: Any, cleanup: list[str], root: Any = None) -> None:
     config = {"configurable": {"thread_id": thread_id}}
     try:
         for update in _GRAPH.stream(graph_input, config, stream_mode="updates"):
@@ -139,6 +139,11 @@ def _stream(thread_id: str, run: Run, graph_input: Any, cleanup: list[str]) -> N
                     run.result = result
                 elif node == "validate" and values.get("review_result") is not None:
                     run.review = _dump(values["review_result"])
+                    # Record each validate-loop attempt so retries are visible
+                    # in Langfuse Scores (e.g. grounded@1, rubric-consistent@2).
+                    if root is not None:
+                        iteration = values.get("validate_iteration", 1)
+                        score_intermediate(root, run.review, iteration)
 
         if run.status != "pending_followup":
             run.status = "completed" if run.result else "failed"
@@ -207,6 +212,15 @@ def _get_run(thread_id: str) -> Run:
 
 
 app = FastAPI(title="eval-agent", dependencies=[Depends(_require_token)])
+
+
+@app.on_event("shutdown")
+def _flush_langfuse() -> None:
+    """Drain the Langfuse event queue so in-flight traces are not lost."""
+    from src.config.tracing import langfuse as _lf
+
+    logger.info("Flushing Langfuse event queue...")
+    _lf.flush()
 
 
 @app.get("/health")

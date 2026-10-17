@@ -54,6 +54,7 @@ def followup_gate_node(state: AgentState) -> dict:
     }
 
 
+@traced_node("ask-followup")
 def ask_followup_node(state: AgentState) -> dict:
     """Pause the graph and surface the follow-up question to the caller.
 
