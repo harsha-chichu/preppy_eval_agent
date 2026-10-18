@@ -127,6 +127,10 @@ class UserInput(BaseModel):
 class AgentState(BaseModel):
     # inputs
     input: UserInput
+    user_id: Optional[str] = Field(
+        default=None,
+        description="Opaque caller-provided user identifier (e.g. the LMS account id), attached to Langfuse traces",
+    )
 
     # transcribe stage (voice answers only; no-op for typed answers)
     transcript: Optional[str] = Field(

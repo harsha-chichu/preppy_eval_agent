@@ -123,33 +123,44 @@ def _package(thread_id: str, out) -> dict:
     }
 
 
-def start(user_input: UserInput, thread_id: str | None = None) -> dict:
+def start(user_input: UserInput, thread_id: str | None = None, user_id: str | None = None) -> dict:
     """Run plan + follow-up gate. Returns either a completed evaluation or a
-    ``pending_followup`` payload carrying the question and ``thread_id``."""
+    ``pending_followup`` payload carrying the question and ``thread_id``.
+
+    ``user_id``, when provided, is stored in the graph state and attached to the
+    Langfuse trace (and to any resumed follow-up segment) for per-user analytics.
+    """
     thread_id = thread_id or uuid4().hex
     config = {"configurable": {"thread_id": thread_id}}
     logger.info("graph.start thread_id=%s", thread_id)
-    with trace_run(thread_id, user_input, "start", start_input(user_input)) as root:
-        out = _GRAPH.invoke(AgentState(input=user_input), config)
+    with trace_run(thread_id, user_input, "start", start_input(user_input), user_id=user_id) as root:
+        out = _GRAPH.invoke(AgentState(input=user_input, user_id=user_id), config)
         packaged = _package(thread_id, out)
         _record(root, packaged)
     return packaged
 
 
-def resume(thread_id: str, answer: str | None = None, audio_path: str | None = None) -> dict:
+def resume(
+    thread_id: str,
+    answer: str | None = None,
+    audio_path: str | None = None,
+    user_id: str | None = None,
+) -> dict:
     """Supply the follow-up answer for ``thread_id`` and finish scoring (or ask
     another follow-up, up to ``max_iterations``).
 
     The answer may be typed (``answer``) or spoken (``audio_path``, transcribed
-    inside ``ask_followup_node``)."""
+    inside ``ask_followup_node``). ``user_id`` defaults to the one stored by
+    ``start()`` so every segment of an evaluation traces under the same user."""
     if not answer and not audio_path:
         raise ValueError("resume() needs answer or audio_path")
     config = {"configurable": {"thread_id": thread_id}}
     logger.info("graph.resume thread_id=%s audio=%s", thread_id, bool(audio_path))
     payload = {"audio_path": audio_path} if audio_path else answer
     values = _GRAPH.get_state(config).values
+    user_id = user_id or _get(values, "user_id")
     run_input = resume_input(_get(values, "followup_question"), answer, audio_path)
-    with trace_run(thread_id, _get(values, "input"), "followup", run_input) as root:
+    with trace_run(thread_id, _get(values, "input"), "followup", run_input, user_id=user_id) as root:
         out = _GRAPH.invoke(Command(resume=payload), config)
         packaged = _package(thread_id, out)
         _record(root, packaged)

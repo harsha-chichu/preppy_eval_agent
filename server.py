@@ -7,7 +7,9 @@ as the follow-up gate has decided - either with the follow-up question, or with
 ``status: "scoring"`` while plan -> execute -> validate keep running. The caller
 polls ``GET /evaluations/{id}`` for the final result.
 
-Every request must carry ``x-agent-token: $EVAL_AGENT_TOKEN``.
+Every request must carry ``x-agent-token: $EVAL_AGENT_TOKEN``. The optional
+``user_id`` form field (sent by the web app) is attached to every Langfuse
+trace of the evaluation so per-user analytics work in the dashboard.
 State lives in the agent's in-memory checkpointer, so restarting this server
 drops in-flight evaluations (the web app falls back to its own scorer).
 """
@@ -37,6 +39,10 @@ if not TOKEN:
 DECISION_TIMEOUT_S = float(os.getenv("EVAL_DECISION_TIMEOUT_S", "90"))
 RUN_TTL_S = 60 * 60
 MAX_AUDIO_BYTES = 15 * 1024 * 1024
+# user_id is trace metadata, not identity data: bound it so a malformed client
+# cannot push arbitrary payloads into Langfuse. 200 matches the SDK limit -
+# propagate_attributes silently drops longer user_id values.
+USER_ID_MAX_LEN = 200
 
 _AUDIO_SUFFIX = {
     "audio/webm": ".webm",
@@ -54,6 +60,7 @@ _AUDIO_SUFFIX = {
 class Run:
     # running -> pending_followup | scoring -> completed | failed
     status: str = "running"
+    user_id: Optional[str] = None
     followup_question: Optional[str] = None
     transcript: Optional[str] = None
     communication: Optional[dict] = None
@@ -96,11 +103,19 @@ def _dump(value: Any) -> Any:
     return value.model_dump(mode="json") if hasattr(value, "model_dump") else value
 
 
+def _clean_user_id(value: Optional[str]) -> Optional[str]:
+    """Normalize the optional ``user_id`` form field sent by the web app."""
+    if not value:
+        return None
+    value = value.strip()
+    return value[:USER_ID_MAX_LEN] or None
+
+
 def _drive(
     thread_id: str, run: Run, graph_input: Any, cleanup: list[str], user_input: UserInput, segment: str, run_input: dict
 ) -> None:
     """Stream the graph until it pauses for a follow-up or finishes."""
-    with trace_run(thread_id, user_input, segment, run_input) as root:
+    with trace_run(thread_id, user_input, segment, run_input, user_id=run.user_id) as root:
         _stream(thread_id, run, graph_input, cleanup, root)
         record_outcome(
             root,
@@ -235,6 +250,7 @@ async def create_evaluation(
     domain: str = Form(...),
     answer: Optional[str] = Form(None),
     audio: Optional[UploadFile] = File(None),
+    user_id: Optional[str] = Form(None),
 ) -> dict:
     _prune()
     audio_path = await _save_audio(audio)
@@ -251,11 +267,13 @@ async def create_evaluation(
         domain=domain,
     )
     thread_id = uuid4().hex
-    run = Run()
+    run = Run(user_id=_clean_user_id(user_id))
     with _LOCK:
         _RUNS[thread_id] = run
     cleanup = [audio_path] if audio_path else []
-    return _start_segment(thread_id, run, AgentState(input=user_input), cleanup, "start")
+    return _start_segment(
+        thread_id, run, AgentState(input=user_input, user_id=run.user_id), cleanup, "start"
+    )
 
 
 @app.post("/evaluations/{thread_id}/followup")
@@ -263,10 +281,14 @@ async def answer_followup(
     thread_id: str,
     answer: Optional[str] = Form(None),
     audio: Optional[UploadFile] = File(None),
+    user_id: Optional[str] = Form(None),
 ) -> dict:
     run = _get_run(thread_id)
     if run.status != "pending_followup":
         raise HTTPException(409, f"evaluation is {run.status}, not waiting for a follow-up")
+    # First writer wins: a run keeps the identity it was created with, so a
+    # follow-up cannot re-attribute an in-flight evaluation to another user.
+    run.user_id = run.user_id or _clean_user_id(user_id)
     audio_path = await _save_audio(audio)
     if not audio_path and not (answer and answer.strip()):
         raise HTTPException(422, "provide answer or audio")
