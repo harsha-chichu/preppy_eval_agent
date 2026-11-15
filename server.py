@@ -29,6 +29,7 @@ from logger import logger
 from src.agent.graph import _GRAPH
 from src.agent.state import AgentState, Difficulty, UserInput
 from src.config import constants as _constants  # noqa: F401  (loads .env)
+from src.summary import SummaryRequest, summarize
 from src.config.tracing import record_outcome, resume_input, score_intermediate, start_input, trace_run
 
 TOKEN = os.getenv("EVAL_AGENT_TOKEN")
@@ -331,3 +332,13 @@ def skip_followup(thread_id: str) -> dict:
 @app.get("/evaluations/{thread_id}")
 def get_evaluation(thread_id: str) -> dict:
     return _get_run(thread_id).snapshot(thread_id)
+
+
+@app.post("/summaries")
+def create_summary(req: SummaryRequest) -> dict:
+    """End-of-session summary: one LLM call, returned directly (no polling)."""
+    try:
+        return summarize(req)
+    except Exception as exc:
+        logger.exception("summary failed")
+        raise HTTPException(502, f"summary failed: {exc}") from exc

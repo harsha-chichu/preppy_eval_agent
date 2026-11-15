@@ -10,6 +10,7 @@ from src.prompts.audio import AUDIO_PROMPT
 from src.prompts.execute import EXECUTE_PROMPT
 from src.prompts.followup import FOLLOWUP_PROMPT
 from src.prompts.plan import PLAN_PROMPT
+from src.prompts.summary import SUMMARY_PROMPT
 from src.prompts.validate import VALIDATE_PROMPT
 
-__all__ = ["PLAN_PROMPT", "FOLLOWUP_PROMPT", "EXECUTE_PROMPT", "VALIDATE_PROMPT", "AUDIO_PROMPT"]
+__all__ = ["PLAN_PROMPT", "FOLLOWUP_PROMPT", "EXECUTE_PROMPT", "VALIDATE_PROMPT", "AUDIO_PROMPT", "SUMMARY_PROMPT"]

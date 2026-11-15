@@ -185,3 +185,15 @@ class AgentState(BaseModel):
                 "resolve the followup before scoring"
             )
         return self
+
+
+class SessionSummary(BaseModel):
+    """Structured reply for the end-of-session summary."""
+
+    summary: str
+    strengths: list[str] = Field(default_factory=list)
+    improvements: list[str] = Field(default_factory=list)
+    clarity_level: float
+    clarity_label: str
+    confidence_level: float
+    confidence_label: str
