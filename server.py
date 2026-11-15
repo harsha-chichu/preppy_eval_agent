@@ -35,8 +35,10 @@ TOKEN = os.getenv("EVAL_AGENT_TOKEN")
 if not TOKEN:
     raise RuntimeError("EVAL_AGENT_TOKEN is not set")
 
-# Transcription (Gemini) + the follow-up gate usually finish well inside this.
-DECISION_TIMEOUT_S = float(os.getenv("EVAL_DECISION_TIMEOUT_S", "90"))
+# The decision is one gate LLM call (plus Gemini transcription for a recording
+# sent without text). Return before the web app gives up (45s) so a slow call
+# degrades to "scoring" instead of a failed request.
+DECISION_TIMEOUT_S = float(os.getenv("EVAL_DECISION_TIMEOUT_S", "40"))
 RUN_TTL_S = 60 * 60
 MAX_AUDIO_BYTES = 15 * 1024 * 1024
 # user_id is trace metadata, not identity data: bound it so a malformed client
@@ -68,6 +70,9 @@ class Run:
     review: Optional[dict] = None
     error: Optional[str] = None
     decided: threading.Event = field(default_factory=threading.Event)
+    # Audio files to delete once the run is finished. They outlive a follow-up
+    # pause: the delivery assessment runs after the gate, in a later segment.
+    files: list[str] = field(default_factory=list)
     updated_at: float = field(default_factory=time.time)
 
     def snapshot(self, thread_id: str) -> dict:
@@ -86,13 +91,21 @@ _RUNS: dict[str, Run] = {}
 _LOCK = threading.Lock()
 
 
+def _remove_files(paths: list[str]) -> None:
+    for path in paths:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+    paths.clear()
+
+
 def _prune() -> None:
     cutoff = time.time() - RUN_TTL_S
     with _LOCK:
-        stale = [tid for tid, run in _RUNS.items() if run.updated_at < cutoff]
-        for tid in stale:
-            _RUNS.pop(tid, None)
-    for tid in stale:
+        stale = [(tid, _RUNS.pop(tid)) for tid, run in list(_RUNS.items()) if run.updated_at < cutoff]
+    for tid, run in stale:
+        _remove_files(run.files)
         try:
             _GRAPH.checkpointer.delete_thread(tid)
         except Exception:  # best effort
@@ -112,11 +125,11 @@ def _clean_user_id(value: Optional[str]) -> Optional[str]:
 
 
 def _drive(
-    thread_id: str, run: Run, graph_input: Any, cleanup: list[str], user_input: UserInput, segment: str, run_input: dict
+    thread_id: str, run: Run, graph_input: Any, user_input: UserInput, segment: str, run_input: dict
 ) -> None:
     """Stream the graph until it pauses for a follow-up or finishes."""
     with trace_run(thread_id, user_input, segment, run_input, user_id=run.user_id) as root:
-        _stream(thread_id, run, graph_input, cleanup, root)
+        _stream(thread_id, run, graph_input, root)
         record_outcome(
             root,
             evaluation_result=run.result,
@@ -125,7 +138,7 @@ def _drive(
         )
 
 
-def _stream(thread_id: str, run: Run, graph_input: Any, cleanup: list[str], root: Any = None) -> None:
+def _stream(thread_id: str, run: Run, graph_input: Any, root: Any = None) -> None:
     config = {"configurable": {"thread_id": thread_id}}
     try:
         for update in _GRAPH.stream(graph_input, config, stream_mode="updates"):
@@ -140,6 +153,8 @@ def _stream(thread_id: str, run: Run, graph_input: Any, cleanup: list[str], root
                 if node == "transcribe" and values.get("transcript"):
                     run.transcript = values["transcript"]
                     run.communication = _dump(values.get("communication_evaluation"))
+                elif node == "assess_delivery" and values.get("communication_evaluation"):
+                    run.communication = _dump(values["communication_evaluation"])
                 elif node == "ask_followup" and values.get("followup_answer"):
                     # Spoken follow-ups are transcribed inside ask_followup.
                     run.transcript = values["followup_answer"]
@@ -171,15 +186,12 @@ def _stream(thread_id: str, run: Run, graph_input: Any, cleanup: list[str], root
     finally:
         run.updated_at = time.time()
         run.decided.set()
-        for path in cleanup:
-            try:
-                os.remove(path)
-            except OSError:
-                pass
+        if run.status != "pending_followup":
+            _remove_files(run.files)
 
 
 def _start_segment(
-    thread_id: str, run: Run, graph_input: Any, cleanup: list[str], segment: str, run_input: Optional[dict] = None
+    thread_id: str, run: Run, graph_input: Any, segment: str, run_input: Optional[dict] = None
 ) -> dict:
     config = {"configurable": {"thread_id": thread_id}}
     if isinstance(graph_input, AgentState):
@@ -190,7 +202,7 @@ def _start_segment(
     run.decided = threading.Event()
     run.status = "running"
     worker = threading.Thread(
-        target=_drive, args=(thread_id, run, graph_input, cleanup, user_input, segment, run_input), daemon=True
+        target=_drive, args=(thread_id, run, graph_input, user_input, segment, run_input), daemon=True
     )
     worker.start()
     run.decided.wait(DECISION_TIMEOUT_S)
@@ -267,13 +279,10 @@ async def create_evaluation(
         domain=domain,
     )
     thread_id = uuid4().hex
-    run = Run(user_id=_clean_user_id(user_id))
+    run = Run(user_id=_clean_user_id(user_id), files=[audio_path] if audio_path else [])
     with _LOCK:
         _RUNS[thread_id] = run
-    cleanup = [audio_path] if audio_path else []
-    return _start_segment(
-        thread_id, run, AgentState(input=user_input, user_id=run.user_id), cleanup, "start"
-    )
+    return _start_segment(thread_id, run, AgentState(input=user_input, user_id=run.user_id), "start")
 
 
 @app.post("/evaluations/{thread_id}/followup")
@@ -294,9 +303,10 @@ async def answer_followup(
         raise HTTPException(422, "provide answer or audio")
     text = answer.strip() if answer and answer.strip() else None
     payload = {"audio_path": audio_path, "answer": text} if audio_path else text
-    cleanup = [audio_path] if audio_path else []
+    if audio_path:
+        run.files.append(audio_path)
     run_input = resume_input(run.followup_question, text, audio_path)
-    return _start_segment(thread_id, run, Command(resume=payload), cleanup, "followup", run_input)
+    return _start_segment(thread_id, run, Command(resume=payload), "followup", run_input)
 
 
 @app.post("/evaluations/{thread_id}/skip-followup")
@@ -315,7 +325,7 @@ def skip_followup(thread_id: str) -> dict:
         {"awaiting_followup_answer": False, "iteration": max_iterations, "followup_question": None},
         as_node="ask_followup",
     )
-    return _start_segment(thread_id, run, None, [], "skip-followup", run_input)
+    return _start_segment(thread_id, run, None, "skip-followup", run_input)
 
 
 @app.get("/evaluations/{thread_id}")

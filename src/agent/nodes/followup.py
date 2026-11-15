@@ -1,7 +1,7 @@
 from logger import logger
 from langgraph.types import interrupt
 
-from src.agent.state import AgentState, AudioAnalysis, FollowupDecision
+from src.agent.state import AgentState, AudioAnalysis, Difficulty, FollowupDecision
 from src.config.client import call_gemini_audio, call_structured_llm
 from src.config.tracing import traced_node
 from src.prompts import AUDIO_PROMPT, FOLLOWUP_PROMPT
@@ -27,6 +27,13 @@ def followup_gate_node(state: AgentState) -> dict:
 
     # Free static lookup - no LLM call. Reused by plan_node so it need not refetch.
     rubric = state.rubric or fetch_rubric(state.input.domain)
+
+    # The caller is waiting on this node. When no follow-up can be asked, don't
+    # spend an LLM call finding that out: easy mode never asks one (same policy
+    # as the web app's own evaluator), and a spent budget can't ask another.
+    if state.input.difficulty == Difficulty.easy or state.iteration >= state.max_iterations:
+        logger.info("followup_gate_node: no follow-up possible, proceeding to scoring.")
+        return {"rubric": rubric, "awaiting_followup_answer": False}
 
     prompt = FOLLOWUP_PROMPT.format(
         actual_question=state.input.actual_question,
