@@ -11,11 +11,15 @@ graph TD;
 	ask_followup(ask_followup)
 	execute(execute)
 	validate(validate)
+	assess_delivery(assess_delivery)
 	__end__([<p>__end__</p>]):::last
-	__start__ --> transcribe;
+	__start__ -.-> followup_gate;
+	__start__ -.-> transcribe;
 	ask_followup --> followup_gate;
+	assess_delivery --> execute;
 	execute --> validate;
 	followup_gate -.-> ask_followup;
+	followup_gate -.-> assess_delivery;
 	followup_gate -.-> plan;
 	plan --> execute;
 	transcribe --> followup_gate;

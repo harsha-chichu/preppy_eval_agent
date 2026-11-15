@@ -1,15 +1,19 @@
 """LangGraph wiring for the evaluation agent.
 
-Flow:  transcribe -> followup_gate -> (ask_followup -> followup_gate)*
-       -> plan -> execute -> validate -> (execute -> validate)*  -> END
+Flow:  [transcribe] -> followup_gate -> (ask_followup -> followup_gate)*
+       -> (plan || assess_delivery) -> execute -> validate -> (execute -> validate)*  -> END
 
-``transcribe`` is a no-op for typed answers; for voice answers it sends the
-audio to Gemini and fills ``transcript`` + ``communication_evaluation``.
+The caller waits only until ``followup_gate`` has decided, so everything before
+it is latency the user feels. Keep that path to at most one LLM call:
 
-``followup_gate`` runs first so a follow-up question reaches the caller after a
-single LLM call. It decides using the question, the answer and the fixed rubric
-(a free static lookup) - not the plan, whose LLM call is deferred until after the
-follow-up loop clears.
+* ``transcribe`` runs first ONLY for a recording sent without text - the gate
+  needs the words. When the user's reviewed text came with the recording, the
+  slow Gemini audio call is only needed for delivery scores, so it runs as
+  ``assess_delivery`` after the gate, in parallel with ``plan``.
+* ``followup_gate`` skips its LLM call when no follow-up is allowed (easy mode,
+  or the follow-up budget is spent). It decides using the question, the answer
+  and the fixed rubric (a free static lookup) - not the plan, whose LLM call is
+  deferred until after the follow-up loop clears.
 
 ``ask_followup`` calls ``interrupt()``, so the graph pauses there and hands the
 follow-up question back to the caller. The caller collects an answer and calls
@@ -33,6 +37,7 @@ from logger import logger
 from src.agent import state as _state
 from src.agent.nodes import (
     ask_followup_node,
+    assess_delivery_node,
     execute_node,
     followup_gate_node,
     plan_node,
@@ -63,8 +68,14 @@ _SERDE = JsonPlusSerializer(
 )
 
 
-def route_after_gate(state: AgentState) -> str:
-    return "ask_followup" if state.awaiting_followup_answer else "plan"
+def route_start(state: AgentState) -> str:
+    # Only a recording without text needs transcribing before the gate.
+    return "transcribe" if state.input.audio_path and not state.input.user_response else "followup_gate"
+
+
+def route_after_gate(state: AgentState) -> str | list[str]:
+    # plan and assess_delivery are independent; run them side by side.
+    return "ask_followup" if state.awaiting_followup_answer else ["plan", "assess_delivery"]
 
 
 def route_after_validate(state: AgentState) -> str:
@@ -79,16 +90,18 @@ def build_graph():
     builder.add_node("ask_followup", ask_followup_node)
     builder.add_node("execute", execute_node)
     builder.add_node("validate", validate_node)
+    builder.add_node("assess_delivery", assess_delivery_node)
 
-    builder.add_edge(START, "transcribe")
+    builder.add_conditional_edges(START, route_start, ["transcribe", "followup_gate"])
     builder.add_edge("transcribe", "followup_gate")
     builder.add_conditional_edges(
         "followup_gate",
         route_after_gate,
-        {"ask_followup": "ask_followup", "plan": "plan"},
+        ["ask_followup", "plan", "assess_delivery"],
     )
     builder.add_edge("ask_followup", "followup_gate")
-    builder.add_edge("plan", "execute")
+    # execute waits for both branches.
+    builder.add_edge(["plan", "assess_delivery"], "execute")
     builder.add_edge("execute", "validate")
     builder.add_conditional_edges(
         "validate",

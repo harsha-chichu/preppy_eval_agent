@@ -8,8 +8,10 @@ Trace layout (one trace per graph segment, grouped into a session per evaluation
     ├── decide-followup (chain)
     │   └── decide-followup (generation)
     ├── ask-followup (chain)
-    ├── plan-evaluation (chain)
-    │   └── write-grading-plan (generation)
+    ├── plan-evaluation (chain)              } run side by side
+    │   └── write-grading-plan (generation)  }
+    ├── assess-delivery (chain)              } (text + recording only)
+    │   └── transcribe-and-assess-audio (generation, Gemini)
     ├── score-answer (chain)
     │   └── score-answer (generation)
     └── review-evaluation (evaluator)
