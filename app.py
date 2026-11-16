@@ -12,6 +12,10 @@ import streamlit as st
 
 from src.agent.graph import resume, start
 from src.agent.state import Difficulty, EvalStatus, UserInput
+from src.config.constants import GEMINI_API_KEY
+
+# Voice answers need Gemini (Claude can't take audio); hide the recorder without a key.
+VOICE_ENABLED = bool(GEMINI_API_KEY)
 
 # The question under test - same as main.py.
 QUESTION = "What is machine learning and how does backpropagation work?"
@@ -53,8 +57,12 @@ phase = st.session_state.phase
 # ── 1. initial answer ────────────────────────────────────────────────────────
 if phase == "answer":
     answer = st.text_area("Your answer", height=160, key="answer")
-    st.caption("…or answer out loud instead:")
-    audio = st.audio_input("Record your answer", key="audio")
+    audio = None
+    if VOICE_ENABLED:
+        st.caption("…or answer out loud instead:")
+        audio = st.audio_input("Record your answer", key="audio")
+    else:
+        st.caption("Voice answers are unavailable - please type your answer.")
 
     has_answer = bool(answer.strip()) or audio is not None
     if st.button("Submit answer", type="primary", disabled=not has_answer):
@@ -87,8 +95,10 @@ elif phase == "followup":
     st.warning(f"**The agent needs a follow-up:**\n\n{question}")
     n = len(st.session_state.followups)
     fa = st.text_area("Your follow-up answer", height=120, key=f"fa_{n}")
-    st.caption("…or answer out loud instead:")
-    fa_audio = st.audio_input("Record your follow-up answer", key=f"faa_{n}")
+    fa_audio = None
+    if VOICE_ENABLED:
+        st.caption("…or answer out loud instead:")
+        fa_audio = st.audio_input("Record your follow-up answer", key=f"faa_{n}")
 
     has_reply = bool(fa.strip()) or fa_audio is not None
     if st.button("Submit follow-up", type="primary", disabled=not has_reply):

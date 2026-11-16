@@ -5,25 +5,45 @@ from typing import Type, TypeVar
 
 from pydantic import BaseModel
 
-from src.config.constants import GEMINI_API_KEY, GEMINI_MODEL, MODEL
+from src.config.constants import ANTHROPIC_API_KEY, GEMINI_API_KEY, GEMINI_MODEL, MODEL
 from src.config.tracing import trace_generation
 from litellm import completion
 
-# Validate required key — GEMINI_API_KEY now covers both text and audio calls.
-if not GEMINI_API_KEY:
-    raise RuntimeError("GEMINI_API_KEY is not set")
+
+def _is_anthropic(model: str) -> bool:
+    return model.startswith("anthropic/")
+
+
+def _api_key_for(model: str) -> str:
+    """Pick the provider key from the litellm model prefix."""
+    key = ANTHROPIC_API_KEY if _is_anthropic(model) else GEMINI_API_KEY
+    if not key:
+        name = "ANTHROPIC_API_KEY" if _is_anthropic(model) else "GEMINI_API_KEY"
+        raise RuntimeError(f"{name} is not set (needed for model {model!r})")
+    return key
+
+
+# Fail fast at startup if the main text model's key is missing.
+_api_key_for(MODEL)
 
 T = TypeVar("T", bound=BaseModel)
 
 
 def _complete(name: str, model: str, messages: list, temperature: float, max_tokens: int, attempt: int = 1, **kwargs):
     """``litellm.completion`` recorded as a Langfuse generation named ``name``."""
+    params = {"temperature": temperature}
+    if _is_anthropic(model):
+        # Current Claude models (e.g. Haiku 5.5) reject non-default temperature,
+        # and thinking is on by default and counts toward max_tokens.
+        params = {}
+        max_tokens = max(max_tokens, 8000)
+    kwargs.setdefault("api_key", _api_key_for(model))
     with trace_generation(name, model, messages, temperature, max_tokens, attempt) as record:
         response = completion(
             model=model,
             messages=messages,
-            temperature=temperature,
             max_tokens=max_tokens,
+            **params,
             **kwargs,
         )
         record(response)
@@ -42,7 +62,6 @@ def call_llm(
         [{"role": "user", "content": prompt}],
         temperature,
         max_tokens,
-        api_key=GEMINI_API_KEY,
     )
 
     return response.choices[0].message.content
@@ -68,7 +87,6 @@ def call_structured_llm(
         messages,
         temperature,
         max_tokens,
-        api_key=GEMINI_API_KEY,
         response_format=schema,
     )
     content = response.choices[0].message.content
@@ -91,8 +109,7 @@ def call_structured_llm(
             temperature,
             max_tokens,
             attempt=2,
-            api_key=GEMINI_API_KEY,
-            response_format=schema,
+                response_format=schema,
         )
         return schema.model_validate_json(retry.choices[0].message.content)
 
@@ -122,9 +139,6 @@ def call_gemini_audio(
     filler words) meaningful. Same JSON-with-one-retry contract as
     ``call_structured_llm``.
     """
-    if not GEMINI_API_KEY:
-        raise RuntimeError("GEMINI_API_KEY is not set")
-
     ext = os.path.splitext(audio_path)[1].lower()
     mime = _AUDIO_MIME.get(ext) or mimetypes.guess_type(audio_path)[0] or "audio/wav"
     with open(audio_path, "rb") as fh:
@@ -143,7 +157,6 @@ def call_gemini_audio(
         messages,
         temperature,
         max_tokens,
-        api_key=GEMINI_API_KEY,
         response_format=schema,
     )
     content = response.choices[0].message.content
@@ -166,7 +179,6 @@ def call_gemini_audio(
             temperature,
             max_tokens,
             attempt=2,
-            api_key=GEMINI_API_KEY,
-            response_format=schema,
+                response_format=schema,
         )
         return schema.model_validate_json(retry.choices[0].message.content)

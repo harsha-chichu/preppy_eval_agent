@@ -210,9 +210,20 @@ def _start_segment(
     return run.snapshot(thread_id)
 
 
-async def _save_audio(audio: Optional[UploadFile]) -> Optional[str]:
+VOICE_ENABLED = bool(_constants.GEMINI_API_KEY)
+VOICE_UNAVAILABLE = "voice answers are unavailable, please type your answer"
+
+
+async def _save_audio(audio: Optional[UploadFile], answer: Optional[str] = None) -> Optional[str]:
     if audio is None:
         return None
+    if not VOICE_ENABLED:
+        # Audio needs Gemini. With typed text, score the text and drop the
+        # recording; with a recording alone there is nothing we can score.
+        if answer and answer.strip():
+            logger.info("Voice disabled (no GEMINI_API_KEY): ignoring recording, using typed answer.")
+            return None
+        raise HTTPException(503, VOICE_UNAVAILABLE)
     data = await audio.read()
     if not data:
         return None
@@ -253,7 +264,7 @@ def _flush_langfuse() -> None:
 
 @app.get("/health")
 def health() -> dict:
-    return {"ok": True, "runs": len(_RUNS)}
+    return {"ok": True, "runs": len(_RUNS), "voice": VOICE_ENABLED}
 
 
 @app.post("/evaluations")
@@ -266,7 +277,7 @@ async def create_evaluation(
     user_id: Optional[str] = Form(None),
 ) -> dict:
     _prune()
-    audio_path = await _save_audio(audio)
+    audio_path = await _save_audio(audio, answer)
     if not audio_path and not (answer and answer.strip()):
         raise HTTPException(422, "provide answer or audio")
 
@@ -299,7 +310,7 @@ async def answer_followup(
     # First writer wins: a run keeps the identity it was created with, so a
     # follow-up cannot re-attribute an in-flight evaluation to another user.
     run.user_id = run.user_id or _clean_user_id(user_id)
-    audio_path = await _save_audio(audio)
+    audio_path = await _save_audio(audio, answer)
     if not audio_path and not (answer and answer.strip()):
         raise HTTPException(422, "provide answer or audio")
     text = answer.strip() if answer and answer.strip() else None
