@@ -32,7 +32,15 @@ def execute_node(state: AgentState) -> dict:
         answer_style=rubric.answer_style,
         key_points=rubric.key_points,
     )
-    result = call_structured_llm(prompt, EvaluationResult, name="score-answer", max_tokens=3000)
+    # Room for the suggested answer on top of feedback (and the follow-up note);
+    # Gemini's thinking tokens count toward this limit too.
+    result = call_structured_llm(prompt, EvaluationResult, name="score-answer", max_tokens=6000)
+    if not (result.suggested_answer or "").strip() or not result.suggested_points:
+        logger.warning(
+            "execute_node: no suggested answer (followup=%s, points=%d)",
+            bool(state.followup_answer),
+            len(result.suggested_points),
+        )
 
     result.evaluation_plan_used = state.plan
 

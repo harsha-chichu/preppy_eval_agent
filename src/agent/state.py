@@ -103,12 +103,15 @@ class EvaluationResult(BaseModel):
     followup_evaluation: Optional[str] = Field(
         default=None, description="Evaluation specifically for the followup answer, if provided"
     )
-    suggested_answer: Optional[str] = Field(
-        default=None,
+    # Required (no default) so the structured output must include them; when they
+    # were optional the model sometimes left them out, mostly on runs with a
+    # follow-up, and the app showed no suggested answer.
+    suggested_answer: str = Field(
+        ...,
         description="A model answer to the question that applies the feedback and fixes the weaknesses above",
     )
     suggested_points: list[str] = Field(
-        default_factory=list,
+        ...,
         description="3-5 short key points a strong answer covers (the suggested answer in brief)",
     )
     communication_evaluation: Optional[CommunicationEvaluation] = Field(
