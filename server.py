@@ -29,6 +29,7 @@ from logger import logger
 from src.agent.graph import _GRAPH
 from src.agent.state import AgentState, Difficulty, UserInput
 from src.config import constants as _constants  # noqa: F401  (loads .env)
+from src.rubrics import fetch_rubric
 from src.summary import SummaryRequest, summarize
 from src.config.tracing import record_outcome, resume_input, score_intermediate, start_input, trace_run
 
@@ -265,6 +266,12 @@ def _flush_langfuse() -> None:
 @app.get("/health")
 def health() -> dict:
     return {"ok": True, "runs": len(_RUNS), "voice": VOICE_ENABLED}
+
+
+@app.get("/rubrics")
+def get_rubric(domain: str, difficulty: Difficulty) -> dict:
+    """How answers in this domain are scored at this difficulty, for showing before a session."""
+    return fetch_rubric(domain, difficulty).model_dump(mode="json")
 
 
 @app.post("/evaluations")

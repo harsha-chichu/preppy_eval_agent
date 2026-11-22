@@ -6,15 +6,15 @@ Question: {actual_question}
 Candidate answer: {user_response}
 {prior_followup}
 The answer will be scored against this fixed rubric:
-Criteria: {criteria}
-Criterion weightings: {weightings}
+{rubric}
 
 Ask for a follow-up ONLY when the answer is too incomplete or ambiguous to score
 against one of these criteria without guessing - for example it trails off, is a
 non-answer, or could mean several very different things on a criterion that
 carries real weight. A merely WRONG or shallow answer on a criterion is still
 scorable - do not ask in that case. Prefer not asking when the missing piece
-only affects a low-weight criterion.
+only affects a low-weight criterion, or is something the rubric says not to
+penalise at this difficulty.
 
 Return JSON matching the FollowupDecision schema:
 - should_ask_followup: bool

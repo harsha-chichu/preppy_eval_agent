@@ -14,11 +14,33 @@ class EvalStatus(str, Enum):
     completed = "completed"
 
 
+class Criterion(BaseModel):
+    name: str
+    weight: float = Field(..., ge=0, le=1, description="Share of the score; a rubric's weights add up to 1")
+    looks_for: str = Field(..., description="What a strong answer shows on this criterion at this difficulty")
+
+
 class Rubric(BaseModel):
-    topic: Optional[str] = None
-    criteria: list[str]
-    weightings: dict[str, float] = Field(default_factory=dict)
+    """One domain's rubric at one difficulty (see ``src/rubrics.py``)."""
+
+    topic: str
+    difficulty: Difficulty
+    criteria: list[Criterion]
+    expectations: str = Field(..., description="What a strong answer looks like overall at this difficulty")
+    forgiven: list[str] = Field(default_factory=list, description="Gaps this difficulty does not penalise")
+    not_forgiven: list[str] = Field(default_factory=list, description="Gaps this difficulty always penalises")
+    answer_words: str = Field(..., description="Length of the suggested answer, e.g. '60-120'")
+    key_points: int = Field(..., description="How many key points the suggested answer is summarised into")
+    answer_style: str = Field(..., description="How deep and how technical the suggested answer should be")
     source: Optional[str] = None
+
+    def render(self) -> str:
+        """The rubric as prompt text, so every node scores against the same level."""
+        lines = [f"Difficulty: {self.difficulty.value}", f"What this level expects: {self.expectations}", "Criteria:"]
+        lines += [f"- {c.name} ({round(c.weight * 100)}%): {c.looks_for}" for c in self.criteria]
+        lines.append(f"Do not penalise at this level: {'; '.join(self.forgiven)}.")
+        lines.append(f"Always penalise: {'; '.join(self.not_forgiven)}.")
+        return "\n".join(lines)
 
 
 class EvaluationPlan(BaseModel):
@@ -115,7 +137,7 @@ class UserInput(BaseModel):
         description="Local path to the candidate's recorded answer (wav/mp3/m4a/ogg/webm/flac)",
     )
     difficulty: Difficulty = Field(..., description="Difficulty level of the question")
-    domain: str = Field(..., description="Topic/domain selected by the user in the UI, e.g. 'ai', 'ml', 'ai system design', 'ml system design'")
+    domain: str = Field(..., description="Domain selected in the UI, e.g. 'ai-ml', 'backend', 'behavioral' (see src/rubrics.py)")
 
     @model_validator(mode="after")
     def _require_an_answer(self):

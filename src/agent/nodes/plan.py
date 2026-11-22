@@ -5,7 +5,7 @@ from src.agent.state import AgentState, Difficulty, EvaluationPlan, UserInput
 from src.config.client import call_llm
 from src.config.tracing import traced_node
 from src.prompts import PLAN_PROMPT
-from src.utils import fetch_rubric
+from src.rubrics import fetch_rubric
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -19,13 +19,12 @@ def plan_node(state: AgentState) -> dict:
     """
     logger.info("Running plan_node...")
 
-    rubric = state.rubric or fetch_rubric(state.input.domain)
+    rubric = state.rubric or fetch_rubric(state.input.domain, state.input.difficulty)
     prompt = PLAN_PROMPT.format(
         actual_question=state.input.actual_question,
         domain=state.input.domain,
         difficulty=state.input.difficulty.value,
-        criteria=rubric.criteria,
-        weightings=rubric.weightings,
+        rubric=rubric.render(),
     )
     plan_text = call_llm(prompt, name="write-grading-plan")
 
