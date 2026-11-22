@@ -57,6 +57,7 @@ _SERDE = JsonPlusSerializer(
         _state.UserInput,
         _state.Difficulty,
         _state.EvalStatus,
+        _state.Criterion,
         _state.Rubric,
         _state.EvaluationPlan,
         _state.FollowupDecision,

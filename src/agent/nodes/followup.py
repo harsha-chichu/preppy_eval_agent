@@ -5,7 +5,7 @@ from src.agent.state import AgentState, AudioAnalysis, Difficulty, FollowupDecis
 from src.config.client import call_gemini_audio, call_structured_llm
 from src.config.tracing import traced_node
 from src.prompts import AUDIO_PROMPT, FOLLOWUP_PROMPT
-from src.utils import fetch_rubric
+from src.rubrics import fetch_rubric
 
 
 @traced_node("decide-followup")
@@ -26,7 +26,7 @@ def followup_gate_node(state: AgentState) -> dict:
         )
 
     # Free static lookup - no LLM call. Reused by plan_node so it need not refetch.
-    rubric = state.rubric or fetch_rubric(state.input.domain)
+    rubric = state.rubric or fetch_rubric(state.input.domain, state.input.difficulty)
 
     # The caller is waiting on this node. When no follow-up can be asked, don't
     # spend an LLM call finding that out: easy mode never asks one (same policy
@@ -39,8 +39,7 @@ def followup_gate_node(state: AgentState) -> dict:
         actual_question=state.input.actual_question,
         user_response=state.input.user_response or "",
         prior_followup=prior,
-        criteria=rubric.criteria,
-        weightings=rubric.weightings,
+        rubric=rubric.render(),
     )
     decision = call_structured_llm(prompt, FollowupDecision, name="decide-followup")
 

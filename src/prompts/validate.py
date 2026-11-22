@@ -8,8 +8,8 @@ re-grading the candidate and you are NOT nitpicking style.
 Question: {actual_question}
 Candidate answer: {user_response}
 {followup_block}
-Rubric criteria: {criteria}
-Criterion weightings: {weightings}
+Rubric for this difficulty:
+{rubric}
 
 Grading plan the evaluator was told to follow:
 {plan}
@@ -37,7 +37,11 @@ Flag a REAL problem only when:
 - the score is not a plausible weighted reflection of the criteria given the
   weightings;
 - is_correct plainly contradicts the score or the feedback;
-- the plan named a hard requirement that was clearly not applied.
+- the plan named a hard requirement that was clearly not applied;
+- the score or weaknesses clearly ignore the difficulty - e.g. an easy answer
+  marked down mainly for something the rubric says not to penalise at this
+  level, or a hard answer scored 8+ while missing what the level always
+  penalises.
 
 Return JSON matching the ReviewResult schema:
 - is_grounded: bool - claims are supported by the answer (true if no fabrication)

@@ -25,9 +25,12 @@ def execute_node(state: AgentState) -> dict:
         actual_question=state.input.actual_question,
         user_response=state.input.user_response,
         followup_block=followup_block,
-        criteria=rubric.criteria,
-        weightings=rubric.weightings,
+        rubric=rubric.render(),
         plan=state.plan.plan,
+        difficulty=rubric.difficulty.value,
+        answer_words=rubric.answer_words,
+        answer_style=rubric.answer_style,
+        key_points=rubric.key_points,
     )
     result = call_structured_llm(prompt, EvaluationResult, name="score-answer", max_tokens=3000)
 
