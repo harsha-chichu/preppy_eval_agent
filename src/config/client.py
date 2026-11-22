@@ -1,11 +1,24 @@
 import base64
 import mimetypes
 import os
+import random
+import time
 from typing import Type, TypeVar
+
+import litellm
 
 from pydantic import BaseModel
 
-from src.config.constants import ANTHROPIC_API_KEY, GEMINI_API_KEY, GEMINI_MODEL, MODEL
+from logger import logger
+from src.config.constants import (
+    ANTHROPIC_API_KEY,
+    FALLBACK_MODEL,
+    GEMINI_API_KEY,
+    GEMINI_MODEL,
+    LLM_RETRIES,
+    LLM_RETRY_BASE_S,
+    MODEL,
+)
 from src.config.tracing import trace_generation
 from litellm import completion
 
@@ -29,8 +42,48 @@ _api_key_for(MODEL)
 T = TypeVar("T", bound=BaseModel)
 
 
+# Errors worth retrying: the provider is overloaded or briefly unreachable
+# (Gemini's 503 "model is currently experiencing high demand", 429, 5xx,
+# timeouts). Bad requests and auth errors are not retried.
+TRANSIENT_ERRORS = (
+    litellm.ServiceUnavailableError,
+    litellm.RateLimitError,
+    litellm.InternalServerError,
+    litellm.Timeout,
+    litellm.APIConnectionError,
+)
+
+
+def _backoff(retry: int) -> float:
+    """Exponential backoff with jitter: ~1s, 2s, 4s ... for retry 1, 2, 3 ..."""
+    return LLM_RETRY_BASE_S * (2 ** (retry - 1)) * random.uniform(0.75, 1.25)
+
+
 def _complete(name: str, model: str, messages: list, temperature: float, max_tokens: int, attempt: int = 1, **kwargs):
-    """``litellm.completion`` recorded as a Langfuse generation named ``name``."""
+    """``litellm.completion`` recorded as a Langfuse generation named ``name``.
+
+    Temporary provider errors are retried up to ``LLM_RETRIES`` times with
+    backoff, then once on ``FALLBACK_MODEL`` if one is set. Without this, one
+    503 from Gemini failed the whole evaluation and the answer went unscored.
+    """
+    for retry in range(LLM_RETRIES + 1):
+        try:
+            return _complete_once(name, model, messages, temperature, max_tokens, attempt, **kwargs)
+        except TRANSIENT_ERRORS as exc:
+            if retry == LLM_RETRIES:
+                if FALLBACK_MODEL and FALLBACK_MODEL != model:
+                    logger.warning("%s: %s still failing after %d retries (%s); trying %s.",
+                                   name, model, LLM_RETRIES, type(exc).__name__, FALLBACK_MODEL)
+                    kwargs.pop("api_key", None)  # the fallback may use another provider's key
+                    return _complete_once(name, FALLBACK_MODEL, messages, temperature, max_tokens, attempt, **kwargs)
+                raise
+            delay = _backoff(retry + 1)
+            logger.warning("%s: %s on %s, retry %d/%d in %.1fs.",
+                           name, type(exc).__name__, model, retry + 1, LLM_RETRIES, delay)
+            time.sleep(delay)
+
+
+def _complete_once(name: str, model: str, messages: list, temperature: float, max_tokens: int, attempt: int = 1, **kwargs):
     params = {"temperature": temperature}
     if _is_anthropic(model):
         # Current Claude models (e.g. Haiku 5.5) reject non-default temperature,

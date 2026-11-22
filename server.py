@@ -14,6 +14,7 @@ State lives in the agent's in-memory checkpointer, so restarting this server
 drops in-flight evaluations (the web app falls back to its own scorer).
 """
 
+import asyncio
 import os
 import tempfile
 import threading
@@ -192,7 +193,7 @@ def _stream(thread_id: str, run: Run, graph_input: Any, root: Any = None) -> Non
             _remove_files(run.files)
 
 
-def _start_segment(
+async def _start_segment(
     thread_id: str, run: Run, graph_input: Any, segment: str, run_input: Optional[dict] = None
 ) -> dict:
     config = {"configurable": {"thread_id": thread_id}}
@@ -207,7 +208,9 @@ def _start_segment(
         target=_drive, args=(thread_id, run, graph_input, user_input, segment, run_input), daemon=True
     )
     worker.start()
-    run.decided.wait(DECISION_TIMEOUT_S)
+    # Wait in a worker thread: a blocking wait here would freeze the event loop,
+    # so every other request (other users' answers, score polls) queued behind it.
+    await asyncio.to_thread(run.decided.wait, DECISION_TIMEOUT_S)
     return run.snapshot(thread_id)
 
 
@@ -301,7 +304,7 @@ async def create_evaluation(
     run = Run(user_id=_clean_user_id(user_id), files=[audio_path] if audio_path else [])
     with _LOCK:
         _RUNS[thread_id] = run
-    return _start_segment(thread_id, run, AgentState(input=user_input, user_id=run.user_id), "start")
+    return await _start_segment(thread_id, run, AgentState(input=user_input, user_id=run.user_id), "start")
 
 
 @app.post("/evaluations/{thread_id}/followup")
@@ -325,11 +328,11 @@ async def answer_followup(
     if audio_path:
         run.files.append(audio_path)
     run_input = resume_input(run.followup_question, text, audio_path)
-    return _start_segment(thread_id, run, Command(resume=payload), "followup", run_input)
+    return await _start_segment(thread_id, run, Command(resume=payload), "followup", run_input)
 
 
 @app.post("/evaluations/{thread_id}/skip-followup")
-def skip_followup(thread_id: str) -> dict:
+async def skip_followup(thread_id: str) -> dict:
     run = _get_run(thread_id)
     if run.status != "pending_followup":
         raise HTTPException(409, f"evaluation is {run.status}, not waiting for a follow-up")
@@ -344,7 +347,7 @@ def skip_followup(thread_id: str) -> dict:
         {"awaiting_followup_answer": False, "iteration": max_iterations, "followup_question": None},
         as_node="ask_followup",
     )
-    return _start_segment(thread_id, run, None, "skip-followup", run_input)
+    return await _start_segment(thread_id, run, None, "skip-followup", run_input)
 
 
 @app.get("/evaluations/{thread_id}")
