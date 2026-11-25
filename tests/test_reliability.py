@@ -120,3 +120,48 @@ def test_server_answers_other_requests_while_a_decision_is_pending(monkeypatch):
     assert total < 2.0, (total, submits)
     assert health_wait < 0.5
     assert threading.active_count() < 50
+
+
+# --- suggested answer -------------------------------------------------------
+
+def _eval_json(suggested: str, points: list[str]) -> str:
+    import json
+
+    return json.dumps({
+        "score": 7, "is_correct": True, "feedback": "ok", "strengths": [], "weaknesses": [],
+        "followup_evaluation": None, "suggested_answer": suggested, "suggested_points": points,
+    })
+
+
+def _execute_state():
+    from src.agent.state import AgentState, Difficulty, EvaluationPlan, UserInput
+    from src.rubrics import fetch_rubric
+
+    rubric = fetch_rubric("backend", Difficulty.medium)
+    return AgentState(
+        input=UserInput(actual_question="how do you cache?", user_response="redis", domain="backend", difficulty=Difficulty.medium),
+        plan=EvaluationPlan(rubric=rubric, plan="grade it"),
+        followup_question="and stampedes?",
+        followup_answer="locks",
+    )
+
+
+def test_execute_retries_once_when_the_suggested_answer_is_empty(monkeypatch, calls):
+    from src.agent.nodes import execute
+
+    monkeypatch.setattr(client, "completion", _fake_completion(calls, [
+        _ok(_eval_json("", [])),
+        _ok(_eval_json("I'd use redis with request coalescing.", ["redis", "coalescing"])),
+    ]))
+    out = execute.execute_node(_execute_state())
+    assert len(calls) == 2
+    assert out["evaluation_result"].suggested_answer.startswith("I'd use redis")
+
+
+def test_execute_keeps_the_first_result_when_the_retry_is_empty_too(monkeypatch, calls):
+    from src.agent.nodes import execute
+
+    monkeypatch.setattr(client, "completion", _fake_completion(calls, [_ok(_eval_json("", [])), _ok(_eval_json(" ", [""]))]))
+    out = execute.execute_node(_execute_state())
+    assert len(calls) == 2
+    assert out["evaluation_result"].score == 7

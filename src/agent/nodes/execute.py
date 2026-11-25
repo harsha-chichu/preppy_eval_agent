@@ -7,6 +7,10 @@ from src.config.tracing import traced_node
 from src.prompts import EXECUTE_PROMPT
 
 
+def _has_suggestion(result: EvaluationResult) -> bool:
+    return bool((result.suggested_answer or "").strip()) and any(p.strip() for p in result.suggested_points)
+
+
 @traced_node("score-answer")
 def execute_node(state: AgentState) -> dict:
     """Run the full evaluation using the plan, rubric, and any follow-up answer."""
@@ -35,12 +39,16 @@ def execute_node(state: AgentState) -> dict:
     # Room for the suggested answer on top of feedback (and the follow-up note);
     # Gemini's thinking tokens count toward this limit too.
     result = call_structured_llm(prompt, EvaluationResult, name="score-answer", max_tokens=6000)
-    if not (result.suggested_answer or "").strip() or not result.suggested_points:
-        logger.warning(
-            "execute_node: no suggested answer (followup=%s, points=%d)",
-            bool(state.followup_answer),
-            len(result.suggested_points),
-        )
+    # The schema requires both fields, but the model can still send them empty
+    # (seen mostly with a follow-up, where the prompt is longest). Nothing in the
+    # app fills that in, so ask once more; keep the first result if that fails too.
+    if not _has_suggestion(result):
+        logger.warning("execute_node: empty suggested answer (followup=%s); retrying once.", bool(state.followup_answer))
+        retry = call_structured_llm(prompt, EvaluationResult, name="score-answer-retry", max_tokens=6000)
+        if _has_suggestion(retry):
+            result = retry
+        else:
+            logger.warning("execute_node: still no suggested answer after the retry.")
 
     result.evaluation_plan_used = state.plan
 
