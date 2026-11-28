@@ -1,7 +1,7 @@
 """Prompt for the end-of-session summary written by ``POST /summaries``."""
 
 SUMMARY_PROMPT = """\
-You are an experienced technical interviewer. Write the end-of-session summary
+You are an experienced interviewer. Write the end-of-session summary
 for a {difficulty} {domain} mock interview.
 
 <session>

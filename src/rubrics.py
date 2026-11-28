@@ -12,7 +12,7 @@ so the web app can show candidates how they'll be scored before they start.
 The model never invents a rubric; it only applies this one.
 
 Domain keys match the LMS web app (``ai-ml``, ``data-science``, ``backend``,
-``frontend``, ``system-design``, ``behavioral``). The older keys (``ai``, ``ml``,
+``frontend``, ``system-design``, ``behavioral``, ``finance-accounting``). The older keys (``ai``, ``ml``,
 ``ai system design``, ``ml system design``, ``general``) still work.
 """
 
@@ -209,6 +209,28 @@ _DOMAINS: dict[str, list[tuple[str, dict[Difficulty, tuple[float, str]]]]] = {
             _E: (0.15, "Says what you learned."),
             _M: (0.20, "Reflects honestly, including what you would do differently."),
             _H: (0.25, "Shows self-awareness and how the lesson changed later decisions."),
+        }),
+    ],
+    "finance-accounting": [
+        ("technical accuracy", {
+            _E: (0.40, "States the concept, standard or rule correctly, such as the right statement, assertion or test."),
+            _M: (0.30, "Gets the treatment right and names the relevant standard or section (Ind AS / IFRS, Income-tax Act, GST, SAs)."),
+            _H: (0.25, "Precise on standards, sections and thresholds, including the exceptions that apply to this case."),
+        }),
+        ("application and working", {
+            _E: (0.25, "Gives a simple example, such as a journal entry or a small number."),
+            _M: (0.30, "Applies the rule to the scenario and shows the working: entries, computation or the effect on each statement."),
+            _H: (0.30, "Works through a multi-issue case end to end, with numbers, and shows the effect on profit, cash and the balance sheet."),
+        }),
+        ("judgement, risk and compliance", {
+            _E: (0.10, "Notices the obvious risk or disclosure."),
+            _M: (0.20, "Covers disclosure, control or compliance points, and what could go wrong."),
+            _H: (0.25, "Makes a reasoned call where judgement is needed, weighing materiality, audit or tax risk, and ethics."),
+        }),
+        ("clarity of explanation", {
+            _E: (0.25, "Explains plainly, the way you would to a client or a non-finance manager."),
+            _M: (0.20, "A clear structure, with the conclusion first and then the reasons."),
+            _H: (0.20, "A concise recommendation a partner or CFO could act on."),
         }),
     ],
     "ml": [
