@@ -1,6 +1,6 @@
 from logger import logger
 
-from src.agent.state import AgentState, ReviewResult
+from src.agent.state import AgentState, ReviewResult, render_followups
 from src.config.client import call_structured_llm
 from src.config.tracing import traced_node
 from src.prompts import VALIDATE_PROMPT
@@ -32,13 +32,7 @@ def validate_node(state: AgentState) -> dict:
     """
     logger.info("Running validate_node (validate_iteration=%s)...", state.validate_iteration)
 
-    followup_block = ""
-    if state.followup_answer:
-        followup_block = (
-            "Follow-up asked to resolve ambiguity:\n"
-            f"  Q: {state.followup_question}\n"
-            f"  A: {state.followup_answer}\n"
-        )
+    followup_block = render_followups(state.followups)
 
     rubric = state.plan.rubric
     result = state.evaluation_result

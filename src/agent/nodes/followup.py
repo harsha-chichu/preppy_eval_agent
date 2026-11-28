@@ -1,7 +1,7 @@
 from logger import logger
 from langgraph.types import interrupt
 
-from src.agent.state import AgentState, AudioAnalysis, Difficulty, FollowupDecision
+from src.agent.state import AgentState, AudioAnalysis, Difficulty, FollowupDecision, FollowupTurn, render_followups
 from src.config.client import call_gemini_audio, call_structured_llm
 from src.config.tracing import traced_node
 from src.prompts import AUDIO_PROMPT, FOLLOWUP_PROMPT
@@ -17,13 +17,7 @@ def followup_gate_node(state: AgentState) -> dict:
     """
     logger.info("Running followup_gate_node (iteration=%s)...", state.iteration)
 
-    prior = ""
-    if state.followup_question and state.followup_answer:
-        prior = (
-            f"A previous follow-up was already asked:\n"
-            f"  Q: {state.followup_question}\n"
-            f"  A: {state.followup_answer}\n"
-        )
+    prior = render_followups(state.followups)
 
     # Free static lookup - no LLM call. Reused by plan_node so it need not refetch.
     rubric = state.rubric or fetch_rubric(state.input.domain, state.input.difficulty)
@@ -89,6 +83,7 @@ def ask_followup_node(state: AgentState) -> dict:
 
     return {
         "followup_answer": answer,
+        "followups": [*state.followups, FollowupTurn(question=state.followup_question or "", answer=answer or None)],
         "awaiting_followup_answer": False,
         "iteration": state.iteration + 1,
     }

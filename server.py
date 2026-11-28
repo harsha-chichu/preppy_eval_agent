@@ -28,7 +28,7 @@ from langgraph.types import Command
 
 from logger import logger
 from src.agent.graph import _GRAPH
-from src.agent.state import AgentState, Difficulty, UserInput
+from src.agent.state import AgentState, Difficulty, FollowupTurn, UserInput
 from src.config import constants as _constants  # noqa: F401  (loads .env)
 from src.rubrics import fetch_rubric
 from src.summary import SummaryRequest, summarize
@@ -339,12 +339,19 @@ async def skip_followup(thread_id: str) -> dict:
     config = {"configurable": {"thread_id": thread_id}}
     values = _GRAPH.get_state(config).values
     max_iterations = values.get("max_iterations", 2) if isinstance(values, dict) else 2
+    followups = list(values.get("followups") or []) if isinstance(values, dict) else []
     run_input = resume_input(run.followup_question, "(skipped)", None)
-    # Close the pending follow-up as if it had been answered and exhaust the
-    # follow-up budget, so the gate proceeds straight to scoring.
+    # Close the pending follow-up as skipped (so scoring sees it was asked but not
+    # answered) and exhaust the follow-up budget, so the gate proceeds to scoring.
     _GRAPH.update_state(
         config,
-        {"awaiting_followup_answer": False, "iteration": max_iterations, "followup_question": None},
+        {
+            "awaiting_followup_answer": False,
+            "iteration": max_iterations,
+            "followups": [*followups, FollowupTurn(question=run.followup_question or "", answer=None)],
+            "followup_question": None,
+            "followup_answer": None,
+        },
         as_node="ask_followup",
     )
     return await _start_segment(thread_id, run, None, "skip-followup", run_input)

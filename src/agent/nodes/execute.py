@@ -1,6 +1,6 @@
 from logger import logger
 
-from src.agent.state import AgentState, EvaluationResult
+from src.agent.state import AgentState, EvaluationResult, render_followups
 from src.config.client import call_structured_llm
 from src.config.constants import CONTENT_WEIGHT
 from src.config.tracing import traced_node
@@ -12,13 +12,7 @@ def execute_node(state: AgentState) -> dict:
     """Run the full evaluation using the plan, rubric, and any follow-up answer."""
     logger.info("Running execute_node...")
 
-    followup_block = ""
-    if state.followup_answer:
-        followup_block = (
-            "Follow-up asked to resolve ambiguity:\n"
-            f"  Q: {state.followup_question}\n"
-            f"  A: {state.followup_answer}\n"
-        )
+    followup_block = render_followups(state.followups)
 
     rubric = state.plan.rubric
     prompt = EXECUTE_PROMPT.format(
@@ -38,8 +32,14 @@ def execute_node(state: AgentState) -> dict:
     if not (result.suggested_answer or "").strip() or not result.suggested_points:
         logger.warning(
             "execute_node: no suggested answer (followup=%s, points=%d)",
-            bool(state.followup_answer),
+            bool(state.followups),
             len(result.suggested_points),
+        )
+    if len(result.followup_suggestions) != len(state.followups):
+        logger.warning(
+            "execute_node: %d follow-up suggestions for %d follow-ups",
+            len(result.followup_suggestions),
+            len(state.followups),
         )
 
     result.evaluation_plan_used = state.plan

@@ -93,6 +93,30 @@ class AudioAnalysis(BaseModel):
     communication: CommunicationEvaluation
 
 
+class FollowupTurn(BaseModel):
+    """One follow-up the candidate was asked, and their answer (None if skipped)."""
+
+    question: str
+    answer: Optional[str] = None
+
+
+class FollowupSuggestion(BaseModel):
+    question: str = Field(..., description="The follow-up question, copied as asked")
+    suggested_answer: str = Field(..., description="A short model answer to this follow-up, spoken in first person")
+
+
+def render_followups(followups: list[FollowupTurn]) -> str:
+    """Every follow-up asked so far, for prompts. Empty string when there were none."""
+    if not followups:
+        return ""
+    lines = ["Follow-ups asked, in order:"]
+    for i, f in enumerate(followups, 1):
+        lines.append(f"  {i}. Q: {f.question}")
+        lines.append(f"     A: {f.answer}" if f.answer else "     A: (skipped - the candidate did not answer)")
+    lines.append("Judge the whole exchange: the main answer plus every follow-up answer. A skipped follow-up shows nothing extra.")
+    return "\n".join(lines) + "\n"
+
+
 class EvaluationResult(BaseModel):
     score: float = Field(..., ge=0, le=10, description="Score out of 10 for the response")
     is_correct: bool = Field(..., description="Whether the response is considered correct")
@@ -113,6 +137,11 @@ class EvaluationResult(BaseModel):
     suggested_points: list[str] = Field(
         ...,
         description="3-5 short key points a strong answer covers (the suggested answer in brief)",
+    )
+    # Required for the same reason; an empty list when no follow-up was asked.
+    followup_suggestions: list[FollowupSuggestion] = Field(
+        ...,
+        description="One short model answer per follow-up listed in the prompt, in the same order; empty if none",
     )
     communication_evaluation: Optional[CommunicationEvaluation] = Field(
         default=None, description="Evaluation of communication skills (grammar, pronunciation, filler words, pauses, etc.)"
@@ -178,6 +207,9 @@ class AgentState(BaseModel):
     )
     followup_answer: Optional[str] = Field(
         default=None, description="The user's answer to the followup question, once provided"
+    )
+    followups: list[FollowupTurn] = Field(
+        default_factory=list, description="Every follow-up asked so far and its answer (None if skipped)"
     )
     awaiting_followup_answer: bool = Field(
         default=False, description="True when a followup was asked but not yet answered"
